@@ -1,0 +1,6 @@
+@KoiFishAuction.API_HostAddress = http://localhost:5273
+
+GET {{KoiFishAuction.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

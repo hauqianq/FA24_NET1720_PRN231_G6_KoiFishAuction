@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="RequestModels\AuctionHistory\" />
+    <Folder Include="RequestModels\Notification\" />
+    <Folder Include="RequestModels\Payment\" />
+    <Folder Include="ViewModels\Bid\" />
+    <Folder Include="ViewModels\AuctionHistory\" />
+    <Folder Include="ViewModels\KoiFish\" />
+    <Folder Include="ViewModels\Notification\" />
+    <Folder Include="ViewModels\Payment\" />
+  </ItemGroup>
+
+</Project>
