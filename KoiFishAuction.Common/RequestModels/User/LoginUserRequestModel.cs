@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace JewelryAuction.Business.RequestModels.User
+namespace KoiFishAuction.Common.RequestModels.User
 {
-    public class LoginRequestModel
+    public class LoginUserRequestModel
     {
         [Required]
         public string Username { get; set; }

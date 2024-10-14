@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace JewelryAuction.Business.RequestModels.User
+namespace KoiFishAuction.Common.RequestModels.User
 {
-    public class RegisterRequestModel
+    public class RegisterUserRequestModel
     {
         [Required]
-        public string Username { get; set; }
+        public string UserName { get; set; }
 
         [Required]
         [DataType(DataType.Password)]

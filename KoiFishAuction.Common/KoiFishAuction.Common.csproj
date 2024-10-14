@@ -10,11 +10,14 @@
     <Folder Include="RequestModels\AuctionHistory\" />
     <Folder Include="RequestModels\Notification\" />
     <Folder Include="RequestModels\Payment\" />
-    <Folder Include="ViewModels\Bid\" />
     <Folder Include="ViewModels\AuctionHistory\" />
-    <Folder Include="ViewModels\KoiFish\" />
     <Folder Include="ViewModels\Notification\" />
     <Folder Include="ViewModels\Payment\" />
+    <Folder Include="ViewModels\User\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
   </ItemGroup>
 
 </Project>

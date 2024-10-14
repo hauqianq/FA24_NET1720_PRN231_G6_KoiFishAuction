@@ -1,29 +1,29 @@
-﻿using JewelryAuction.Business.Business.Interface;
+﻿using KoiFishAuction.Service.Services.Interface;
 
-namespace JewelryAuction.Business.Business.Implementation
+namespace KoiFishAuction.Service.Services.Implementation
 {
-    public class JewelryAuctionResult : IJewelryAuctionResult
+    public class ServiceResult : IServiceResult
     {
         public int Status { get; set; }
         public string? Message { get; set; }
         public object? Data { get; set; }
 
-        public JewelryAuctionResult(int status)
+        public ServiceResult(int status)
         {
             Status = status;
         }
-        public JewelryAuctionResult(int status, string message)
+        public ServiceResult(int status, string message)
         {
             Status = status;
             Message = message;
         }
-        
-        public JewelryAuctionResult(int status, object data)
+
+        public ServiceResult(int status, object data)
         {
             Status = status;
             Data = data;
         }
-        public JewelryAuctionResult(int status, string message, object data)
+        public ServiceResult(int status, string message, object data)
         {
             Status = status;
             Message = message;

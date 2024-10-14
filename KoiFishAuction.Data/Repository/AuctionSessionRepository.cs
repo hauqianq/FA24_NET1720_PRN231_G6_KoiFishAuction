@@ -1,5 +1,4 @@
-﻿using JewelryAuction.Data;
-using KoiFishAuction.Data.Base;
+﻿using KoiFishAuction.Data.Base;
 using KoiFishAuction.Data.Enumerrations;
 using KoiFishAuction.Data.Models;
 using Microsoft.EntityFrameworkCore;
@@ -16,24 +15,24 @@ namespace KoiFishAuction.Data.Repository
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<AuctionSession>> GetOngoingAuctionsAsync()
+        public async Task<List<AuctionSession>> GetOngoingAuctionSessionAsync()
         {
             return await _context.AuctionSessions.Include(a => a.Winner)
                                             .Include(a => a.Creator)
                                                 .Include(a => a.KoiFish)
                                                 .Include(a => a.Bids)
-                                            .Where(a => a.Status == (int)AuctionStatus.Open)
+                                            .Where(a => a.Status == (int)AuctionStatus.Opening)
                                             .ToListAsync();
         }
 
-        public async Task<List<AuctionSession>> GetAuctionsForUserAsync(int userid)
+        public async Task<List<AuctionSession>> GetAuctionSessionForUserAsync(int userid)
         {
             var auctions = await _context.AuctionSessions.Where(a => a.CreatorId == userid).ToListAsync();
             foreach (var auction in auctions)
             {
                 if (auction.EndTime <= DateTime.Now && auction.Status != (int) AuctionStatus.Closed)
                 {
-                    await UpdateAuctionStatusAsync(auction.Id, (int)AuctionStatus.Closed);
+                    await UpdateAuctionSessionStatusAsync(auction.Id, (int)AuctionStatus.Closed);
                 }
             }
 
@@ -44,7 +43,7 @@ namespace KoiFishAuction.Data.Repository
                                             .Where(a => a.CreatorId == userid).ToListAsync();
         }
 
-        public async Task<AuctionSession> GetAuctionByIdAsync(int id)
+        public async Task<AuctionSession> GetAuctionSessionByIdAsync(int id)
         {
             var result = await _context.AuctionSessions.Include(a => a.KoiFish)
                                             .Include(a => a.Winner)
@@ -54,7 +53,7 @@ namespace KoiFishAuction.Data.Repository
             return result;
         }
 
-        public async Task SetAuctionWinnerAsync(int auctionId, int winnerId)
+        public async Task SetAuctionSessionWinnerAsync(int auctionId, int winnerId)
         {
             var auction = await _context.AuctionSessions.FirstOrDefaultAsync(a => a.Id == auctionId);
             if (auction != null)
@@ -65,7 +64,7 @@ namespace KoiFishAuction.Data.Repository
             }
         }
 
-        public async Task UpdateAuctionStatusAsync(int auctionId, int status)
+        public async Task UpdateAuctionSessionStatusAsync(int auctionId, int status)
         {
             var auction = await _context.AuctionSessions.FirstOrDefaultAsync(a => a.Id == auctionId);
             if (auction != null)

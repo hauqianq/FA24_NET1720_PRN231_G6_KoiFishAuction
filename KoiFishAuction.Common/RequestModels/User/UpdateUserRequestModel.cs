@@ -1,4 +1,4 @@
-﻿namespace JewelryAuction.Business.RequestModels.User
+﻿namespace KoiFishAuction.Common.ViewModels.User
 {
     public class UpdateUserRequestModel
     {

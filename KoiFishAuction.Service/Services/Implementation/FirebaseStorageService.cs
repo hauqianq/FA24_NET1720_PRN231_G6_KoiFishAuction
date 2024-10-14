@@ -1,20 +1,20 @@
 ﻿using Firebase.Storage;
-using JewelryAuction.Business.Business.Interface;
+using KoiFishAuction.Service.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace JewelryAuction.Business.Business.Implementation
 {
-    public class FirebaseStorageBusiness : IFirebaseStorageBusiness
+    public class FirebaseStorageService : IFirebaseStorageService
     {
         private readonly IConfiguration _configuration;
 
-        public FirebaseStorageBusiness(IConfiguration configuration)
+        public FirebaseStorageService(IConfiguration configuration)
         {
             _configuration = configuration;
         }
 
-        public async Task<string> UploadJewelryImage(IFormFile image)
+        public async Task<string> UploadKoiFishImage(IFormFile image)
         {
             string firebaseBucket = _configuration["Firebase:StorageBucket"];
 
@@ -22,7 +22,7 @@ namespace JewelryAuction.Business.Business.Implementation
 
             string filename = Guid.NewGuid().ToString() + "_" + image.FileName;
 
-            var task = firebaseStorage.Child("Jewelries").Child(filename);
+            var task = firebaseStorage.Child("KoiFish").Child(filename);
 
             var stream = image.OpenReadStream();
             await task.PutAsync(stream);

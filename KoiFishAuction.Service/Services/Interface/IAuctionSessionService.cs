@@ -1,19 +1,17 @@
-﻿using JewelryAuction.Business.Business.Implementation;
-using JewelryAuction.Business.RequestModels.Auction;
-using JewelryAuction.Business.RequestModels.Bid;
+﻿using KoiFishAuction.Common.RequestModels.AuctionSession;
+using KoiFishAuction.Service.Services.Implementation;
 
 namespace KoiFishAuction.Service.Services.Interface
 {
     public interface IAuctionSessionService
     {
-        Task<JewelryAuctionResult> CreateAuctionAsync(CreateAuctionRequestModel request, int ownerid);
-        Task<JewelryAuctionResult> GetOngoingAuctionsAsync(string search = null);
-        Task<JewelryAuctionResult> GetAuctionsForUserAsync(int userid);
-        Task<JewelryAuctionResult> GetAuctionByIdAsync(int id);
-        Task<JewelryAuctionResult> PlaceBidAsync(CreateBidRequestModel request);
-        Task<JewelryAuctionResult> SetAuctionWinnerAsync(int auctionId, int winnerId);
-        Task<JewelryAuctionResult> ChangeAuctionStatusAsync(int id);
-        Task<JewelryAuctionResult> UpdateAuctionAsync(UpdateAuctionRequestModel request);
-        Task<JewelryAuctionResult> CanUpdateAuctionAsync(int id);
+        Task<ServiceResult> CreateAuctionAsync(CreateAuctionSessionRequestModel request, int ownerid);
+        Task<ServiceResult> GetOngoingAuctionsAsync(string search = null);
+        Task<ServiceResult> GetAuctionsForUserAsync(int userid);
+        Task<ServiceResult> GetAuctionByIdAsync(int id);
+        Task<ServiceResult> SetAuctionWinnerAsync(int auctionId, int winnerId);
+        Task<ServiceResult> ChangeAuctionStatusAsync(int id);
+        Task<ServiceResult> UpdateAuctionAsync(UpdateAuctionSessionRequestModel request);
+        Task<ServiceResult> CanUpdateAuctionAsync(int id);
     }
 }

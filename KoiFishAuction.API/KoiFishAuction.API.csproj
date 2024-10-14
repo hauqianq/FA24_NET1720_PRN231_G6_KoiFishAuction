@@ -16,4 +16,10 @@
     <ProjectReference Include="..\KoiFishAuction.Service\KoiFishAuction.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="appsettings.Development.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

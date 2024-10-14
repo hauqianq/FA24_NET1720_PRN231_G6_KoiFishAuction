@@ -1,7 +1,7 @@
 ﻿using KoiFishAuction.Data.Models;
 using KoiFishAuction.Data.Repository;
 
-namespace JewelryAuction.Data
+namespace KoiFishAuction.Data
 {
     public class UnitOfWork
     {
@@ -27,7 +27,7 @@ namespace JewelryAuction.Data
             {
                 if (_koiFishRepository == null)
                 {
-                    _koiFishRepository = new KoiFishRepository();
+                    _koiFishRepository = new KoiFishRepository(_context);
                 }
                 return _koiFishRepository;
             }

@@ -1,6 +1,6 @@
-﻿namespace JewelryAuction.Business.Business.Interface
+﻿namespace KoiFishAuction.Service.Services.Interface
 {
-    public interface IJewelryAuctionResult
+    public interface IServiceResult
     {
         int Status { get; set; }
         string? Message { get; set; }

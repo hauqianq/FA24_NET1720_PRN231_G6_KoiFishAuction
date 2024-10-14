@@ -1,5 +1,4 @@
-using KoiFishAuction.Data.Models;
-using Microsoft.EntityFrameworkCore;
+using KoiFishAuction.API.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,11 +6,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSqlConfiguration(builder.Configuration);
+builder.Services.AddApplicationServices();
+
 
 var app = builder.Build();
-
-builder.Services.AddDbContext<FA24_NET1720_PRN231_G6_KoiFishAuctionContext>(options =>
-    options.UseSqlServer(app.Configuration.GetConnectionString("DefaultConnection")));
 
 if (app.Environment.IsDevelopment())
 {

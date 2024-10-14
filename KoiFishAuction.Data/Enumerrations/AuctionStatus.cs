@@ -2,7 +2,8 @@
 {
     public enum AuctionStatus
     {
-        Open = 1,
-        Closed = 2
+        Opening = 1,
+        Closed = 2,
+        Future = 3
     }
 }
