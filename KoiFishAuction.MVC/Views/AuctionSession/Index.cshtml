@@ -1,0 +1,140 @@
+﻿@model List<KoiFishAuction.Common.ViewModels.AuctionSession.AuctionSessionViewModel>
+
+@{
+    ViewData["Title"] = "Auction";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="~/css/auction/index.css" rel="stylesheet" />
+    <style>
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 250px;
+            margin-right: 10px;
+        }
+
+        .search-button, .create-button {
+            height: 38px;
+            line-height: 1;
+        }
+
+        .form {
+            display: flex;
+        }
+
+        .auction-container {
+            margin-bottom: 20px;
+        }
+
+        .auction-image {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+        }
+
+        .auction-details {
+            padding-left: 15px;
+        }
+
+        .no-auctions {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #888;
+        }
+
+        .auction-status {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            color: white;
+        }
+
+        .status-opening {
+            background-color: #28a745;
+        }
+
+        .status-closed {
+            background-color: #dc3545;
+        }
+
+        .status-future {
+            background-color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        @if (ViewBag.Message != null)
+        {
+            <div class="alert alert-info">
+                @ViewBag.Message
+            </div>
+        }
+
+        <div class="header-container">
+            <div class="search-container">
+                @using (Html.BeginForm("Index", "Auctions", FormMethod.Post, new { @class = "form" }))
+                {
+                    <input type="text" name="SearchQuery" class="form-control search-input" placeholder="Search by Jewelry Name" />
+                    <button type="submit" class="btn btn-primary search-button">Search</button>
+                }
+            </div>
+            <a href="@Url.Action("Create", "Auctions")" class="btn btn-light create-button">Create New Auction</a>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <div class="auction-container card">
+                    <div class="row no-gutters">
+                        <div class="col-12 col-lg-4">
+                            <img src="@item.Image" alt="Auction Image" class="auction-image card-img" />
+                        </div>
+                        <div class="col-12 col-lg-8">
+                            <div class="card-body auction-details">
+                                <h5 class="card-title">
+                                    <a href="@Url.Action("Details", "AuctionSession", new { id = item.Id })">
+                                        @item.Name (@item.KoiFishName)
+                                    </a>
+                                </h5>
+                                <div><strong>Current Price:</strong> @item.Price</div>
+                                <div><strong>Start Time:</strong> @item.StartTime.ToString("f")</div>
+                                <div><strong>End Time:</strong> @item.EndTime.ToString("f")</div>
+                                <div>
+                                    <span class="auction-status @(item.Status == "Opening" ? "status-opening" : item.Status == "Closed" ? "status-closed" : "status-future")">
+                                        @item.Status
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="no-auctions">No Active Auctions</p>
+        }
+    </div>
+</body>
+</html>

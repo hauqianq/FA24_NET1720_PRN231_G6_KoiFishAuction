@@ -1,0 +1,48 @@
+﻿/* details.css */
+.jewelry-details-container {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.jewelry-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.jewelry-info {
+    padding: 20px;
+}
+
+    .jewelry-info h5 {
+        margin-bottom: 15px;
+        font-weight: bold;
+        color: #343a40;
+    }
+
+    .jewelry-info div {
+        margin-bottom: 10px;
+    }
+
+    .jewelry-info .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+        .jewelry-info .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+    .jewelry-info .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+
+        .jewelry-info .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }

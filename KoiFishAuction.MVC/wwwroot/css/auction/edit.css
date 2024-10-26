@@ -1,0 +1,16 @@
+﻿.form-group {
+    margin-bottom: 20px;
+}
+
+.form-control, .btn-outline-success, .btn-outline-info {
+    width: 100%;
+}
+
+.form-button-group {
+    display: flex;
+    gap: 10px;
+}
+
+    .form-button-group .btn {
+        flex: 1;
+    }

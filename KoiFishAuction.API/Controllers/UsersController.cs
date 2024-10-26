@@ -19,22 +19,33 @@ namespace KoiFishAuction.API.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterUserRequestModel request)
         {
             var result = await _userService.RegisterUserAsync(request);
-            if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
+            if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
             {
-                return Ok(result.Message);
+                BadRequest(result.Message);
             }
-            return BadRequest(result.Message);
+            return Ok(result);
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginUserRequestModel request)
         {
             var result = await _userService.LoginUserAsync(request);
-            if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
+            if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
             {
-                return Ok(result.Data);
+                BadRequest(result.Message);
             }
-            return BadRequest(result.Message);
+            return Ok(result);
+        }
+
+        [HttpPut("update")]
+        public async Task<IActionResult> Update([FromBody] LoginUserRequestModel request)
+        {
+            var result = await _userService.LoginUserAsync(request);
+            if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
+            {
+                BadRequest(result.Message);
+            }
+            return Ok(result);
         }
     }
 }

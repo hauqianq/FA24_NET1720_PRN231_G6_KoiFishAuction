@@ -7,6 +7,11 @@ namespace KoiFishAuction.Data
     {
         private readonly FA24_NET1720_PRN231_G6_KoiFishAuctionContext _context;
 
+        public UnitOfWork(FA24_NET1720_PRN231_G6_KoiFishAuctionContext context)
+        {
+            _context = context;
+        }
+
         private UserRepository _userRepository;
         public UserRepository UserRepository
         {

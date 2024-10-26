@@ -1,18 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace KoiFishAuction.Common.RequestModels.User
+﻿namespace KoiFishAuction.Common.RequestModels.User
 {
     public class RegisterUserRequestModel
     {
-        [Required]
         public string UserName { get; set; }
-
-        [Required]
-        [DataType(DataType.Password)]
         public string Password { get; set; }
-
-        [Required]
-        [EmailAddress]
         public string Email { get; set; }
+        public string FullName { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Address { get; set; }
     }
 }

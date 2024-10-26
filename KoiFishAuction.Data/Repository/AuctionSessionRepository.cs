@@ -18,10 +18,10 @@ namespace KoiFishAuction.Data.Repository
         public async Task<List<AuctionSession>> GetOngoingAuctionSessionAsync()
         {
             return await _context.AuctionSessions.Include(a => a.Winner)
-                                            .Include(a => a.Creator)
-                                                .Include(a => a.KoiFish)
+                                                .Include(a => a.Creator)
+                                                .Include(a => a.KoiFish).ThenInclude(k => k.KoiImages)
                                                 .Include(a => a.Bids)
-                                            .Where(a => a.Status == (int)AuctionStatus.Opening)
+                                            .Where(a => a.Status == (int)AuctionSessionStatus.Opening)
                                             .ToListAsync();
         }
 
@@ -30,9 +30,9 @@ namespace KoiFishAuction.Data.Repository
             var auctions = await _context.AuctionSessions.Where(a => a.CreatorId == userid).ToListAsync();
             foreach (var auction in auctions)
             {
-                if (auction.EndTime <= DateTime.Now && auction.Status != (int) AuctionStatus.Closed)
+                if (auction.EndTime <= DateTime.Now && auction.Status != (int)AuctionSessionStatus.Closed)
                 {
-                    await UpdateAuctionSessionStatusAsync(auction.Id, (int)AuctionStatus.Closed);
+                    await UpdateAuctionSessionStatusAsync(auction.Id, (int)AuctionSessionStatus.Closed);
                 }
             }
 
@@ -45,31 +45,32 @@ namespace KoiFishAuction.Data.Repository
 
         public async Task<AuctionSession> GetAuctionSessionByIdAsync(int id)
         {
-            var result = await _context.AuctionSessions.Include(a => a.KoiFish)
+            var result = await _context.AuctionSessions.Include(a => a.KoiFish).ThenInclude(KoiFish => KoiFish.KoiImages)
                                             .Include(a => a.Winner)
                                             .Include(a => a.Creator)
                                             .Include(a => a.Bids)
-                                                .FirstOrDefaultAsync(a => a.Id == id);
+                                            .FirstOrDefaultAsync(a => a.Id == id);
             return result;
         }
 
-        public async Task SetAuctionSessionWinnerAsync(int auctionId, int winnerId)
+        public async Task SetWinnerForAuctionSession(int winnerId, int auctionSessionId)
         {
-            var auction = await _context.AuctionSessions.FirstOrDefaultAsync(a => a.Id == auctionId);
-            if (auction != null)
-            {
-                auction.WinnerId = winnerId;
-                _context.AuctionSessions.Update(auction);
-                await _unitOfWork.AuctionSessionRepository.SaveAsync();
-            }
+            var auctionSession = await _context.AuctionSessions.FirstOrDefaultAsync(auc => auc.Id == auctionSessionId);
+            auctionSession.WinnerId = winnerId;
+            await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAuctionSessionStatusAsync(int auctionId, int status)
+        public async Task UpdateAuctionSessionStatusAsync(int id, int status)
         {
-            var auction = await _context.AuctionSessions.FirstOrDefaultAsync(a => a.Id == auctionId);
+            var auction = await _context.AuctionSessions.FirstOrDefaultAsync(a => a.Id == id);
             if (auction != null)
             {
                 auction.Status = status;
+                if (status == (int)AuctionSessionStatus.Closed)
+                {
+                    var winner = await _unitOfWork.BidRepository.FindHighestBidder(id);
+                    await SetWinnerForAuctionSession(winner.Id, id);
+                }
                 _context.AuctionSessions.Update(auction);
                 await _unitOfWork.AuctionSessionRepository.SaveAsync();
             }

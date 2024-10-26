@@ -1,0 +1,253 @@
+﻿@model KoiFishAuction.Common.ViewModels.AuctionSession.AuctionSessionDetailViewModel
+@using static KoiFishAuction.Data.Enumerrations.AuctionSessionStatus
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@Model.Name - Auction Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css" />
+    <style>
+        .auction-details {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .auction-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .auction-slider {
+            width: 100%;
+            max-width: 400px;
+            margin-right: 20px;
+        }
+
+            .auction-slider img {
+                width: 100%;
+                height: auto;
+            }
+
+        .auction-info {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .auction-title {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .auction-meta p {
+            margin: 5px 0;
+        }
+
+        .bid-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+
+        .bid-input {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+
+        .bid-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+            .bid-button:hover {
+                background-color: #218838;
+            }
+
+        .bid-history {
+            margin-top: 40px;
+        }
+
+            .bid-history table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .bid-history th, .bid-history td {
+                padding: 10px;
+                border: 1px solid #ddd;
+                text-align: left;
+            }
+
+            .bid-history th {
+                background-color: #f4f4f4;
+            }
+
+        .auction-status {
+            margin: 10px 0;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+            display: inline-block;
+        }
+
+        .status-open {
+            background-color: #28a745;
+        }
+
+        .status-closed {
+            background-color: #dc3545;
+        }
+
+        .status-future {
+            background-color: #ffc107;
+        }
+
+        @@media (max-width: 600px) {
+            .auction-header {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .auction-slider {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auction-details">
+
+        <!-- Auction Header -->
+        <div class="auction-header">
+            <div class="auction-slider">
+                @foreach (var image in Model.Images)
+                {
+                    <img src="@image" alt="@Model.KoiFishName" />
+                }
+            </div>
+            <div class="auction-info">
+                <h1 class="auction-title">@Model.Name</h1>
+                <div class="auction-meta">
+                    <p><strong>Koi Fish Name:</strong> @Model.KoiFishName</p>
+                    <p><strong>Current Price:</strong> @Model.Price.ToString("C")</p>
+                    <p><strong>Minimum Increment:</strong> @Model.MinIncrement.ToString("C")</p>
+                    <p><strong>Start Time:</strong> @Model.StartTime.ToString("g")</p>
+                    <p><strong>End Time:</strong> @Model.EndTime.ToString("g")</p>
+                    <p>
+                        <strong>Status:</strong>
+                        <span class="auction-status @(Model.Status == "Open" ? "status-open" : Model.Status == "Closed" ? "status-closed" : "status-future")">
+                            @Model.Status
+                        </span>
+                    </p>
+                    @if (!string.IsNullOrEmpty(Model.WinnerUsername))
+                    {
+                        <p><strong>Current Highest Bidder:</strong> @Model.WinnerUsername</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Bid Section -->
+        <div class="bid-section">
+            <h2>Place Your Bid</h2>
+            @if (Model.Status == KoiFishAuction.Data.Enumerrations.AuctionSessionStatus.Opening.ToString())
+            {
+                @using (Html.BeginForm("PlaceBid", "Auction", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Id)
+                    <div>
+                        <label for="BidAmount">Enter your bid amount:</label><br />
+                        <input type="number" id="BidAmount" name="BidAmount" class="bid-input" min="@Model.Price + @Model.MinIncrement" required />
+                        <input type="submit" value="Place Bid" class="bid-button" />
+                    </div>
+                }
+            }
+            else
+            {
+                <h2>Bidding is Closed</h2>
+                @if (!string.IsNullOrEmpty(Model.WinnerUsername))
+                {
+                    <p>Congratulations to <strong>@Model.WinnerUsername</strong> for winning the auction!</p>
+                }
+                else
+                {
+                    <p>This auction has ended with no bids.</p>
+                }
+            }
+        </div>
+
+        <!-- Bid History -->
+        @if (Model.BidViewModels != null && Model.BidViewModels.Any())
+        {
+            <div class="bid-history">
+                <h2>Bid History</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bidder</th>
+                            <th>Amount</th>
+                            <th>Currency</th>
+                            <th>Bid Time</th>
+                            <th>Location</th>
+                            <th>Winning</th>
+                            <th>Note</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var bid in Model.BidViewModels.OrderByDescending(b => b.Timestamp))
+                        {
+                            <tr>
+                                <td>@bid.BidderName</td>
+                                <td>@bid.Amount.ToString("C")</td>
+                                <td>@bid.Currency</td>
+                                <td>@bid.Timestamp.ToString("g")</td>
+                                <td>@bid.Location</td>
+                                <td>@(bid.IsWinning ? "Yes" : "No")</td>
+                                <td>@bid.Note</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="bid-history">
+                <h2>No Bids Yet</h2>
+                <p>Be the first to place a bid!</p>
+            </div>
+        }
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.auction-slider').slick({
+                dots: true,
+                infinite: true,
+                speed: 300,
+                slidesToShow: 1,
+                adaptiveHeight: true
+            });
+        });
+    </script>
+
+</body>
+</html>

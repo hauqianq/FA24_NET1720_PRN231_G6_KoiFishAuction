@@ -6,4 +6,18 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\KoiFishAuction.Service\KoiFishAuction.Service.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Views\User\AuctionSession\" />
+    <Folder Include="Views\User\Profile\" />
+    <Folder Include="Views\User\KoiFish\" />
+  </ItemGroup>
+
 </Project>

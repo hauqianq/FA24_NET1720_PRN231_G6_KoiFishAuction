@@ -40,25 +40,25 @@ namespace KoiFishAuction.Data.Configurations
             builder.HasOne(a => a.KoiFish)
                    .WithMany(k => k.AuctionSessions)
                    .HasForeignKey(a => a.KoiFishId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.NoAction);
 
             // N - 1: AuctionSession - Creator (User)
             builder.HasOne(a => a.Creator)
                    .WithMany()
                    .HasForeignKey(a => a.CreatorId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.NoAction);
 
             // 1 - 1: AuctionSession - AuctionHistory
             builder.HasOne(a => a.AuctionHistory)
                    .WithOne(ah => ah.AuctionSession)
                    .HasForeignKey<AuctionHistory>(ah => ah.AuctionSessionId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.NoAction);
 
             // 1 - N: AuctionSession - Bids
             builder.HasMany(a => a.Bids)
                    .WithOne(b => b.AuctionSession)
                    .HasForeignKey(b => b.AuctionSessionId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

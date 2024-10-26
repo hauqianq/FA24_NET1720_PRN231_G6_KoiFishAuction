@@ -1,0 +1,43 @@
+﻿.container {
+    margin-top: 20px;
+}
+
+.auction-details-container {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.col-lg-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+}
+
+.col-lg-8 {
+    flex: 0 0 66.666667%;
+    max-width: 66.666667%;
+}
+
+.auction-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+
+.auction-info {
+    padding: 20px;
+}
+
+.btn {
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.mt-3 {
+    margin-top: 1rem !important;
+}

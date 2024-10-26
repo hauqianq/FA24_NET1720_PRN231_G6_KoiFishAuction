@@ -12,17 +12,21 @@ namespace KoiFishAuction.Data.Repository
             _context = context;
         }
 
-        public async Task<Bid> GetBidByIdAsync(int id)
-        {
-            return await _context.Bids.Include(b=>b.Bidder)
-                                    .Include(b => b.AuctionSession)
-                                .FirstOrDefaultAsync(b => b.Id == id);
-        }
-        public async Task<List<Bid>> GetBidsByAuctionSessionIdAsync(int auctionId)
+        public async Task<List<Bid>> GetBidsByAuctionSessionIdAsync(int id)
         {
             return await _context.Bids.Include(b => b.Bidder)
                                                .Include(b => b.AuctionSession)
-                                               .Where(b => b.Id == auctionId).ToListAsync();
+                                               .Where(b => b.Id == id).ToListAsync();
         }
+
+        public async Task<User> FindHighestBidder(int id)
+        {
+            return await _context.Bids.Where(b => b.AuctionSessionId == id)
+                                        .OrderByDescending(b => b.Amount)
+                                        .Select(b => b.Bidder)
+                                        .FirstOrDefaultAsync();
+        }
+
+        
     }
 }

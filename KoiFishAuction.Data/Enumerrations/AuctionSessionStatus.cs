@@ -1,6 +1,6 @@
 ﻿namespace KoiFishAuction.Data.Enumerrations
 {
-    public enum AuctionStatus
+    public enum AuctionSessionStatus
     {
         Opening = 1,
         Closed = 2,

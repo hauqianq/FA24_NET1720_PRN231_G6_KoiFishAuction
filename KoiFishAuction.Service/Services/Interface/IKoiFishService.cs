@@ -1,16 +1,16 @@
 ﻿using KoiFishAuction.Common.RequestModels.KoiFish;
-using KoiFishAuction.Service.Services.Implementation;
+using KoiFishAuction.Common.ViewModels.KoiFish;
 
 namespace KoiFishAuction.Service.Services.Interface
 {
     public interface IKoiFishService
     {
-        Task<ServiceResult> GetAllKoiFishesAsync(int sellerid);
-        Task<ServiceResult> GetKoiFishByIdAsync(int id);
-        Task<ServiceResult> CreateKoiFishAsync(CreateKoiFishRequestModel request, int sellerid);
-        Task<ServiceResult> DeleteKoiFishAsync(int id);
-        Task<ServiceResult> CanUpdateKoiFishAsync(int id);
-        Task<ServiceResult> UpdateKoiFishAsync(int id, UpdateKoiFishRequestModel request);
-        Task<ServiceResult> UpdateKoiFishPriceAsync(int jewelryid, decimal price);
+        Task<ServiceResult<List<KoiFishViewModel>>> GetAllKoiFishesAsync();
+        Task<ServiceResult<KoiFishViewModel>> GetKoiFishByIdAsync(int id);
+        Task<ServiceResult<int>> CreateKoiFishAsync(CreateKoiFishRequestModel request);
+        Task<ServiceResult<bool>> DeleteKoiFishAsync(int id);
+        Task<bool> CanUpdateKoiFishAsync(int id);
+        Task<ServiceResult<int>> UpdateKoiFishAsync(int id, UpdateKoiFishRequestModel request);
+        Task<ServiceResult<int>> UpdateKoiFishPriceAsync(int id, decimal price);
     }
 }

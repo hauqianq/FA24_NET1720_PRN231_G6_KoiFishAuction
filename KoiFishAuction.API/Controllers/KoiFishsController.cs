@@ -1,11 +1,13 @@
 ﻿using KoiFishAuction.Common.RequestModels.KoiFish;
 using KoiFishAuction.Service.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KoiFishAuction.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class KoiFishController : ControllerBase
     {
         private readonly IKoiFishService _koiFishService;
@@ -15,15 +17,15 @@ namespace KoiFishAuction.API.Controllers
             _koiFishService = koiFishService;
         }
 
-        [HttpGet("{userid}")]
-        public async Task<IActionResult> GetAllKoiFish(int userid)
+        [HttpGet]
+        public async Task<IActionResult> GetAllKoiFish()
         {
-            var result = await _koiFishService.GetAllKoiFishesAsync(userid);
-            if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
+            var result = await _koiFishService.GetAllKoiFishesAsync();
+            if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
             {
-                return Ok(result.Data);
+                BadRequest(result.Message);
             }
-            return BadRequest(result.Message);
+            return Ok(result);
         }
 
 
@@ -31,44 +33,67 @@ namespace KoiFishAuction.API.Controllers
         public async Task<IActionResult> GetKoiFishById(int id)
         {
             var result = await _koiFishService.GetKoiFishByIdAsync(id);
-            if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
+            if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
             {
-                return Ok(result.Data);
+                BadRequest(result.Message);
             }
-            return BadRequest(result.Message);
+            return Ok(result);
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateKoiFish([FromBody] CreateKoiFishRequestModel request, int sellerId)
+        public async Task<IActionResult> CreateKoiFish([FromBody] CreateKoiFishRequestModel request)
         {
-            var result = await _koiFishService.CreateKoiFishAsync(request, sellerId);
-            if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
+            if (!ModelState.IsValid)
             {
-                return Ok(result.Data);
+                return BadRequest(ModelState);
             }
-            return BadRequest(result.Message);
+            var result = await _koiFishService.CreateKoiFishAsync(request);
+            if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
+            {
+                BadRequest(result.Message);
+            }
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateKoiFish(int id, [FromBody] UpdateKoiFishRequestModel request)
         {
-            var result = await _koiFishService.UpdateKoiFishAsync(id, request);
-            if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
+            if (!ModelState.IsValid)
             {
-                return Ok(result.Data);
+                return BadRequest(ModelState);
             }
-            return BadRequest(result.Message);
+            var result = await _koiFishService.UpdateKoiFishAsync(id, request);
+            if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
+            {
+                BadRequest(result.Message);
+            }
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteKoiFish(int id)
         {
             var result = await _koiFishService.DeleteKoiFishAsync(id);
-            if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
+            if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
             {
-                return Ok(result.Message);
+                BadRequest(result.Message);
             }
-            return BadRequest(result.Message);
+            return Ok(result);
+        }
+
+        [HttpPut("{id}/price")]
+        public async Task<IActionResult> UpdatePrice(int id, [FromBody] decimal price)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _koiFishService.UpdateKoiFishPriceAsync(id, price);
+            if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
+            {
+                BadRequest(result.Message);
+            }
+            return Ok(result);
         }
     }
 }

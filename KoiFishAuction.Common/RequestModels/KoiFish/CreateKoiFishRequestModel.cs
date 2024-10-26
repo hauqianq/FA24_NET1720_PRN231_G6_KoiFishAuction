@@ -8,7 +8,7 @@ namespace KoiFishAuction.Common.RequestModels.KoiFish
         public string Description { get; set; }
         public decimal StartingPrice { get; set; }
         public decimal CurrentPrice { get; set; }
-        public IFormFile ImageUrl { get; set; }
+        public List<IFormFile> Images { get; set; }
         public int Age { get; set; }
         public string Origin { get; set; }
         public decimal Weight { get; set; }

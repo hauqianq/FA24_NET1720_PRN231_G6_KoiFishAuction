@@ -13,7 +13,6 @@
     <Folder Include="ViewModels\AuctionHistory\" />
     <Folder Include="ViewModels\Notification\" />
     <Folder Include="ViewModels\Payment\" />
-    <Folder Include="ViewModels\User\" />
   </ItemGroup>
 
   <ItemGroup>

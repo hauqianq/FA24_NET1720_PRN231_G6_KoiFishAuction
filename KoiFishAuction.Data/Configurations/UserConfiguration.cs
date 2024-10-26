@@ -31,7 +31,7 @@ namespace KoiFishAuction.Data.Configurations
                    .HasMaxLength(200);
 
             builder.Property(u => u.PhoneNumber)
-                   .HasMaxLength(20);
+                   .HasMaxLength(50);
 
             builder.Property(u => u.Address)
                    .HasMaxLength(500);
@@ -42,43 +42,43 @@ namespace KoiFishAuction.Data.Configurations
             builder.HasMany(u => u.Bids)
                    .WithOne(b => b.Bidder)
                    .HasForeignKey(b => b.BidderId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.NoAction);
 
             // 1 - N: User - KoiFishes
             builder.HasMany(u => u.KoiFishes)
                    .WithOne(k => k.Seller)
                    .HasForeignKey(k => k.SellerId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.NoAction);
 
             // 1 - N: User - AuctionHistory (Owner)
             builder.HasMany(u => u.AuctionHistoryOwners)
                    .WithOne(ah => ah.Owner)
                    .HasForeignKey(ah => ah.OwnerId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.NoAction);
 
             // 1 - N: User - AuctionHistory (Winner)
             builder.HasMany(u => u.AuctionHistoryWinners)
                    .WithOne(ah => ah.Winner)
                    .HasForeignKey(ah => ah.WinnerId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.NoAction);
 
             // 1 - N: User - Notifications (Sender)
             builder.HasMany(u => u.NotificationSenders)
                    .WithOne(n => n.Sender)
                    .HasForeignKey(n => n.SenderId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.NoAction);
 
             // 1 - N: User - Notifications (Recipient)
             builder.HasMany(u => u.NotificationUsers)
                    .WithOne(n => n.User)
                    .HasForeignKey(n => n.UserId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.NoAction);
 
             // 1 - N: User - Payments
             builder.HasMany(u => u.Payments)
                    .WithOne(p => p.User)
                    .HasForeignKey(p => p.UserId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

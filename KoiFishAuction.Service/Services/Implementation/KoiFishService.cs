@@ -2,7 +2,9 @@
 using KoiFishAuction.Common.ViewModels.KoiFish;
 using KoiFishAuction.Data;
 using KoiFishAuction.Data.Models;
+using KoiFishAuction.Service.Extensions;
 using KoiFishAuction.Service.Services.Interface;
+using Microsoft.AspNetCore.Http;
 
 namespace KoiFishAuction.Service.Services.Implementation
 {
@@ -10,45 +12,62 @@ namespace KoiFishAuction.Service.Services.Implementation
     {
         private readonly UnitOfWork _unitOfWork;
         private readonly IFirebaseStorageService _firebaseStorageBusiness;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public KoiFishService(UnitOfWork unitOfWork, IFirebaseStorageService firebaseStorageBusiness)
+        public KoiFishService(UnitOfWork unitOfWork, IFirebaseStorageService firebaseStorageBusiness, IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _firebaseStorageBusiness = firebaseStorageBusiness;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<ServiceResult> CanUpdateKoiFishAsync(int id)
+        public async Task<bool> CanUpdateKoiFishAsync(int id)
         {
             try
             {
                 var koiFish = await _unitOfWork.KoiFishRepository.GetByIdAsync(id);
                 if (koiFish == null)
                 {
-                    return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, "This koi fish does not exist.");
+                    return false;
                 }
 
                 var result = await _unitOfWork.KoiFishRepository.IsKoiInAuction(id);
                 if (result)
                 {
-                    return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, "You cannot change the information for this koiFish because it is in auction.");
+                    return false;
                 }
 
-                return new ServiceResult(Common.Constant.StatusCode.SuccessStatusCode);
+                return true;
             }
             catch (Exception e)
             {
-                return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return false;
             }
         }
 
-        public async Task<ServiceResult> CreateKoiFishAsync(CreateKoiFishRequestModel request, int sellerid)
+        private async Task<List<KoiImage>> AddListImages(List<IFormFile> request)
+        {
+            List<KoiImage> images = new List<KoiImage>();
+            foreach (var image in request)
+            {
+                var img = new KoiImage()
+                {
+                    ImageUrl = await _firebaseStorageBusiness.UploadKoiFishImage(image),
+                };
+                images.Add(img);
+            }
+            return images;
+        }
+        public async Task<ServiceResult<int>> CreateKoiFishAsync(CreateKoiFishRequestModel request)
         {
             try
             {
                 if (request.StartingPrice <= 0)
                 {
-                    return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, "The starting price must be greater than 0.");
+                    return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, "The starting price must be greater than 0.");
                 }
+
+                var user = await _unitOfWork.UserRepository.GetUserByIdAsync(int.Parse(_httpContextAccessor.GetCurrentUserId()));
 
                 var koiFish = new KoiFish()
                 {
@@ -56,55 +75,57 @@ namespace KoiFishAuction.Service.Services.Implementation
                     Description = request.Description,
                     StartingPrice = request.StartingPrice,
                     CurrentPrice = request.CurrentPrice,
-                    ImageUrl = await _firebaseStorageBusiness.UploadKoiFishImage(request.ImageUrl),
                     Age = request.Age,
                     Origin = request.Origin,
                     Weight = request.Weight,
                     Length = request.Length,
                     ColorPattern = request.ColorPattern,
-                    SellerId = sellerid,
+                    SellerId = user.Id,
+                    KoiImages = await AddListImages(request.Images)
                 };
 
                 await _unitOfWork.KoiFishRepository.CreateAsync(koiFish);
                 await _unitOfWork.KoiFishRepository.SaveAsync();
 
-                return new ServiceResult(Common.Constant.StatusCode.SuccessStatusCode, "Create successful koi fish.", koiFish);
+                return new ServiceResult<int>(Common.Constant.StatusCode.SuccessStatusCode, "Create successful koi fish.", koiFish.Id);
             }
             catch (Exception e)
             {
-                return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
             }
         }
 
-        public async Task<ServiceResult> DeleteKoiFishAsync(int id)
+        public async Task<ServiceResult<bool>> DeleteKoiFishAsync(int id)
         {
             try
             {
                 var koiFish = await _unitOfWork.KoiFishRepository.GetByIdAsync(id);
                 if (koiFish == null)
                 {
-                    return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, "This koi fish does not exist.");
+                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "This koi fish does not exist.");
                 }
 
                 await _unitOfWork.KoiFishRepository.RemoveAsync(koiFish);
                 await _unitOfWork.KoiFishRepository.SaveAsync();
 
-                return new ServiceResult(Common.Constant.StatusCode.SuccessStatusCode, "Delete koi fish successful.");
+                return new ServiceResult<bool>(Common.Constant.StatusCode.SuccessStatusCode, "Delete koi fish successful.");
             }
             catch (Exception e)
             {
-                return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
             }
         }
 
-        public async Task<ServiceResult> GetAllKoiFishesAsync(int sellerid)
+        public async Task<ServiceResult<List<KoiFishViewModel>>> GetAllKoiFishesAsync()
         {
             try
             {
-                var data = await _unitOfWork.KoiFishRepository.GetAllKoiFishesAsync(sellerid);
+                var user = await _unitOfWork.UserRepository.GetUserByIdAsync(int.Parse(_httpContextAccessor.GetCurrentUserId()));
+
+                var data = await _unitOfWork.KoiFishRepository.GetAllKoiFishesAsync(user.Id);
                 if (data.Count == 0)
                 {
-                    return new ServiceResult(Common.Constant.StatusCode.SuccessStatusCode, "You do not currently own any koiFish.");
+                    return new ServiceResult<List<KoiFishViewModel>>(Common.Constant.StatusCode.SuccessStatusCode, "You do not currently own any koiFish.");
                 }
                 else
                 {
@@ -115,25 +136,25 @@ namespace KoiFishAuction.Service.Services.Implementation
                         CurrentPrice = KoiFish.CurrentPrice,
                         Description = KoiFish.Description,
                         Id = KoiFish.Id,
-                        ImageUrl = KoiFish.ImageUrl,
                         Length = KoiFish.Length,
                         Name = KoiFish.Name,
                         Origin = KoiFish.Origin,
                         SellerUserName = KoiFish.Seller.Username,
                         StartingPrice = KoiFish.StartingPrice,
-                        Weight = KoiFish.Weight
+                        Weight = KoiFish.Weight,
+                        Images = KoiFish.KoiImages.Select(x => x.ImageUrl).ToList()
                     }).ToList();
 
-                    return new ServiceResult(Common.Constant.StatusCode.SuccessStatusCode, result);
+                    return new ServiceResult<List<KoiFishViewModel>>(Common.Constant.StatusCode.SuccessStatusCode, result);
                 }
             }
             catch (Exception e)
             {
-                return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<List<KoiFishViewModel>>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
             }
         }
 
-        public async Task<ServiceResult> GetKoiFishByIdAsync(int id)
+        public async Task<ServiceResult<KoiFishViewModel>> GetKoiFishByIdAsync(int id)
         {
             try
             {
@@ -148,29 +169,29 @@ namespace KoiFishAuction.Service.Services.Implementation
                         CurrentPrice = data.CurrentPrice,
                         Description = data.Description,
                         Id = data.Id,
-                        ImageUrl = data.ImageUrl,
                         Length = data.Length,
                         Name = data.Name,
                         Origin = data.Origin,
                         SellerUserName = data.Seller.Username,
                         StartingPrice = data.StartingPrice,
-                        Weight = data.Weight
-                    };  
+                        Weight = data.Weight,
+                        Images = data.KoiImages.Select(x => x.ImageUrl).ToList()
+                    };
 
-                    return new ServiceResult(Common.Constant.StatusCode.SuccessStatusCode, result);
+                    return new ServiceResult<KoiFishViewModel>(Common.Constant.StatusCode.SuccessStatusCode, result);
                 }
                 else
                 {
-                    return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, "This koiFish does not exist.");
+                    return new ServiceResult<KoiFishViewModel>(Common.Constant.StatusCode.FailedStatusCode, "This koiFish does not exist.");
                 }
             }
             catch (Exception e)
             {
-                return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<KoiFishViewModel>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
             }
         }
 
-        public async Task<ServiceResult> UpdateKoiFishAsync(int id, UpdateKoiFishRequestModel request)
+        public async Task<ServiceResult<int>> UpdateKoiFishAsync(int id, UpdateKoiFishRequestModel request)
         {
             try
             {
@@ -178,12 +199,12 @@ namespace KoiFishAuction.Service.Services.Implementation
 
                 if (koiFish == null)
                 {
-                    return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, "This koiFish does not exist.");
+                    return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, "This koiFish does not exist.");
                 }
 
                 if (request.StartingPrice <= 0)
                 {
-                    return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, "The starting price must be greater than 0.");
+                    return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, "The starting price must be greater than 0.");
                 }
 
                 koiFish.Description = request.Description;
@@ -193,23 +214,23 @@ namespace KoiFishAuction.Service.Services.Implementation
                 _unitOfWork.KoiFishRepository.Update(koiFish);
                 await _unitOfWork.KoiFishRepository.SaveAsync();
 
-                return new ServiceResult(Common.Constant.StatusCode.SuccessStatusCode, "Update koiFish successful.");
+                return new ServiceResult<int>(Common.Constant.StatusCode.SuccessStatusCode, "Update koiFish successful.", koiFish.Id);
             }
             catch (Exception e)
             {
-                return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
             }
         }
 
-        public async Task<ServiceResult> UpdateKoiFishPriceAsync(int koiFishid, decimal price)
+        public async Task<ServiceResult<int>> UpdateKoiFishPriceAsync(int id, decimal price)
         {
             try
             {
-                var koiFish = await _unitOfWork.KoiFishRepository.GetKoiFishByIdAsync(koiFishid);
+                var koiFish = await _unitOfWork.KoiFishRepository.GetKoiFishByIdAsync(id);
 
                 if (koiFish == null)
                 {
-                    return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, "This koiFish does not exist.");
+                    return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, "This koiFish does not exist.");
                 }
 
                 koiFish.CurrentPrice = price;
@@ -217,11 +238,11 @@ namespace KoiFishAuction.Service.Services.Implementation
                 _unitOfWork.KoiFishRepository.Update(koiFish);
                 await _unitOfWork.KoiFishRepository.SaveAsync();
 
-                return new ServiceResult(Common.Constant.StatusCode.SuccessStatusCode);
+                return new ServiceResult<int>(Common.Constant.StatusCode.SuccessStatusCode, id);
             }
             catch (Exception e)
             {
-                return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
             }
         }
     }

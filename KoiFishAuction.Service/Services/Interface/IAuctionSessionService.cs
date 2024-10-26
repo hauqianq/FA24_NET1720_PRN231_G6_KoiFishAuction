@@ -1,17 +1,17 @@
 ﻿using KoiFishAuction.Common.RequestModels.AuctionSession;
-using KoiFishAuction.Service.Services.Implementation;
+using KoiFishAuction.Common.ViewModels.AuctionSession;
 
 namespace KoiFishAuction.Service.Services.Interface
 {
     public interface IAuctionSessionService
     {
-        Task<ServiceResult> CreateAuctionAsync(CreateAuctionSessionRequestModel request, int ownerid);
-        Task<ServiceResult> GetOngoingAuctionsAsync(string search = null);
-        Task<ServiceResult> GetAuctionsForUserAsync(int userid);
-        Task<ServiceResult> GetAuctionByIdAsync(int id);
-        Task<ServiceResult> SetAuctionWinnerAsync(int auctionId, int winnerId);
-        Task<ServiceResult> ChangeAuctionStatusAsync(int id);
-        Task<ServiceResult> UpdateAuctionAsync(UpdateAuctionSessionRequestModel request);
-        Task<ServiceResult> CanUpdateAuctionAsync(int id);
+        Task<ServiceResult<int>> CreateAuctionAsync(CreateAuctionSessionRequestModel request);
+        Task<ServiceResult<List<AuctionSessionViewModel>>> GetOngoingAuctionsAsync(string search = null);
+        Task<ServiceResult<List<AuctionSessionViewModel>>> GetAuctionsForUserAsync();
+        Task<ServiceResult<AuctionSessionDetailViewModel>> GetAuctionByIdAsync(int id);
+        Task<ServiceResult<int>> SetAuctionWinnerAsync(int auctionId);
+        Task<ServiceResult<bool>> ChangeAuctionStatusAsync(int id);
+        Task<ServiceResult<int>> UpdateAuctionAsync(UpdateAuctionSessionRequestModel request);
+        Task<ServiceResult<bool>> CanUpdateAuctionAsync(int id);
     }
 }

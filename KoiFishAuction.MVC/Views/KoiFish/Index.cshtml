@@ -1,0 +1,124 @@
+﻿@model List<KoiFishAuction.Common.ViewModels.KoiFish.KoiFishViewModel>
+@{
+    ViewData["Title"] = "Koi Fish List";
+}
+
+<div class="container">
+    <p>
+        <a class="btn btn-light" asp-action="Create">Create New Koi Fish</a>
+    </p>
+    <div class="header-container">
+        <input type="text" id="SearchQuery" class="form-control search-input" placeholder="Search by Koi Fish Name" oninput="searchKoiFishes()" />
+        <input type="hidden" id="SortOrder" value="" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(ViewBag.Message))
+    {
+        <div class="alert alert-info" id="message" role="alert">
+            @ViewBag.Message
+        </div>
+    }
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th><a href="#" onclick="sortKoiFishes('Name')">Name</a></th>
+                <th><a href="#" onclick="sortKoiFishes('Description')">Description</a></th>
+                <th><a href="#" onclick="sortKoiFishes('StartingPrice')">Starting Price</a></th>
+                <th><a href="#" onclick="sortKoiFishes('CurrentPrice')">Current Price</a></th>
+                <th>Images</th>
+                <th><a href="#" onclick="sortKoiFishes('Age')">Age</a></th>
+                <th><a href="#" onclick="sortKoiFishes('Origin')">Origin</a></th>
+                <th><a href="#" onclick="sortKoiFishes('Weight')">Weight</a></th>
+                <th><a href="#" onclick="sortKoiFishes('Length')">Length</a></th>
+                <th><a href="#" onclick="sortKoiFishes('ColorPattern')">Color Pattern</a></th>
+                <th><a href="#" onclick="sortKoiFishes('SellerUserName')">Seller Username</a></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="koi-fish-table-body">
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Id">
+                            @item.Name
+                        </a>
+                    </td>
+                    <td>@item.Description</td>
+                    <td>@item.StartingPrice</td>
+                    <td>@item.CurrentPrice</td>
+                    <td>
+                        @foreach (var imageUrl in item.Images)
+                        {
+                            <img src="@imageUrl" alt="@item.Name" style="width: 100px; height: auto;" />
+                        }
+                    </td>
+                    <td>@item.Age</td>
+                    <td>@item.Origin</td>
+                    <td>@item.Weight</td>
+                    <td>@item.Length</td>
+                    <td>@item.ColorPattern</td>
+                    <td>@item.SellerUserName</td>
+                    <td>
+                        <a asp-action="Edit" class="btn btn-outline-info btn-sm" asp-route-id="@item.Id">Edit</a>
+                        <a asp-action="Delete" class="btn btn-outline-danger btn-sm" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        function searchKoiFishes() {
+            var searchQuery = document.getElementById("SearchQuery").value;
+            var sortOrder = document.getElementById("SortOrder").value;
+            $.ajax({
+                url: "@Url.Action("Search", "KoiFish")",
+                type: "GET",
+                data: { searchQuery: searchQuery, sortOrder: sortOrder },
+                success: function (data) {
+                    var tableBody = $("#koi-fish-table-body");
+                    tableBody.empty();
+                    $.each(data, function (i, item) {
+                        var imagesHtml = '';
+                        $.each(item.images, function (j, imageUrl) {
+                            imagesHtml += `<img src="${imageUrl}" alt="${item.name}" style="width: 100px; height: auto;" />`;
+                        });
+
+                        var row = `<tr>
+                                    <td><a href="/KoiFish/Details?id=${item.id}">${item.name}</a></td>
+                                    <td>${item.description}</td>
+                                    <td>${item.startingPrice}</td>
+                                    <td>${item.currentPrice}</td>
+                                    <td>${imagesHtml}</td>
+                                    <td>${item.age}</td>
+                                    <td>${item.origin}</td>
+                                    <td>${item.weight}</td>
+                                    <td>${item.length}</td>
+                                    <td>${item.colorPattern}</td>
+                                    <td>${item.sellerUserName}</td>
+                                    <td>
+                                        <a href="/KoiFish/Edit?id=${item.id}" class="btn btn-outline-info btn-sm">Edit</a>
+                                        <a href="/KoiFish/Delete?id=${item.id}" class="btn btn-outline-danger btn-sm">Delete</a>
+                                    </td>
+                                </tr>`;
+                        tableBody.append(row);
+                    });
+                }
+            });
+        }
+
+        function sortKoiFishes(order) {
+            document.getElementById("SortOrder").value = order;
+            searchKoiFishes();
+        }
+
+        setTimeout(function () {
+            $('#message').fadeOut('slow');
+        }, 2000);
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+}

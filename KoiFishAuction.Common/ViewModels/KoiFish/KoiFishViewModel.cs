@@ -8,7 +8,7 @@
         public string Description { get; set; }
         public decimal StartingPrice { get; set; }
         public decimal CurrentPrice { get; set; }
-        public string ImageUrl { get; set; }
+        public List<string> Images { get; set; }
         public int Age { get; set; }
         public string Origin { get; set; }
         public decimal Weight { get; set; }

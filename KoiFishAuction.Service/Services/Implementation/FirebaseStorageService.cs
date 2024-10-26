@@ -22,7 +22,7 @@ namespace JewelryAuction.Business.Business.Implementation
 
             string filename = Guid.NewGuid().ToString() + "_" + image.FileName;
 
-            var task = firebaseStorage.Child("KoiFish").Child(filename);
+            var task = firebaseStorage.Child("KoiFishes").Child(filename);
 
             var stream = image.OpenReadStream();
             await task.PutAsync(stream);

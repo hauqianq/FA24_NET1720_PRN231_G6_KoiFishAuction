@@ -2,34 +2,35 @@
 using KoiFishAuction.Common.ViewModels.Bid;
 using KoiFishAuction.Data;
 using KoiFishAuction.Data.Models;
+using KoiFishAuction.Service.Extensions;
 using KoiFishAuction.Service.Services.Interface;
+using Microsoft.AspNetCore.Http;
 
 namespace KoiFishAuction.Service.Services.Implementation
 {
     public class BidService : IBidService
     {
         private readonly UnitOfWork _unitOfWork;
-        public BidService(UnitOfWork unitOfWork)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public BidService(UnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<ServiceResult> GetAllBidForAuctionSessionAsync(int auctionSessionId)
+        public async Task<ServiceResult<List<BidViewModel>>> GetAllBidForAuctionSessionAsync(int auctionSessionId)
         {
             try
             {
                 var auctionSession = await _unitOfWork.AuctionSessionRepository.GetAuctionSessionByIdAsync(auctionSessionId);
                 if (auctionSession == null)
                 {
-                    return new ServiceResult(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, "Auction session not found.");
+                    return new ServiceResult<List<BidViewModel>>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, "Auction session not found.");
                 }
 
                 var bids = await _unitOfWork.BidRepository.GetBidsByAuctionSessionIdAsync(auctionSessionId);
                 var bidViewModels = bids.Select(b => new BidViewModel
                 {
-                    Id = b.Id,
-                    AuctionSessionId = b.AuctionSessionId,
-                    BidderId = b.BidderId,
                     Amount = b.Amount,
                     Note = b.Note,
                     Timestamp = b.Timestamp,
@@ -38,65 +39,34 @@ namespace KoiFishAuction.Service.Services.Implementation
                     IsWinning = b.IsWinning
                 }).ToList();
 
-                return new ServiceResult(Common.Constant.StatusCode.SuccessStatusCode, bidViewModels);
+                return new ServiceResult<List<BidViewModel>>(Common.Constant.StatusCode.SuccessStatusCode, bidViewModels);
             }
             catch (Exception e)
             {
-                return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<List<BidViewModel>>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
             }
         }
 
-        public async Task<ServiceResult> GetBidByIdAsync(int id)
-        {
-            try
-            {
-                var bid = await _unitOfWork.BidRepository.GetBidByIdAsync(id);
-                if (bid == null)
-                {
-                    return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, "Bid not found.");
-                }
-
-                var bidViewModel = new BidViewModel
-                {
-                    Id = bid.Id,
-                    AuctionSessionId = bid.AuctionSessionId,
-                    BidderId = bid.BidderId,
-                    Amount = bid.Amount,
-                    Note = bid.Note,
-                    Timestamp = bid.Timestamp,
-                    Currency = bid.Currency,
-                    Location = bid.Location,
-                    IsWinning = bid.IsWinning
-                };
-
-                return new ServiceResult(Common.Constant.StatusCode.SuccessStatusCode, bidViewModel);
-            }
-            catch (Exception e)
-            {
-                return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, e.Message);
-            }
-        }
-
-        public async Task<ServiceResult> PlaceBidAsync(CreateBidRequestModel request, int bidderid)
+        public async Task<ServiceResult<bool>> PlaceBidAsync(CreateBidRequestModel request)
         {
             try
             {
                 var auction = await _unitOfWork.AuctionSessionRepository.GetAuctionSessionByIdAsync(request.AuctionSessionId);
                 if (auction == null)
                 {
-                    return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, "This auction does not exist.");
+                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "This auction does not exist.");
                 }
 
-                var bidder = await _unitOfWork.UserRepository.GetUserByIdAsync(bidderid);
+                var bidder = await _unitOfWork.UserRepository.GetUserByIdAsync(int.Parse(_httpContextAccessor.GetCurrentUserId()));
                 if (request.Amount > bidder.Balance)
                 {
-                    return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, "Your account balance is not enough to participate in this auction.");
+                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "Your account balance is not enough to participate in this auction.");
                 }
 
 
                 if (request.Amount <= auction.KoiFish.CurrentPrice)
                 {
-                    return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, "The price paid must be at least equal to the starting price.");
+                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "The price paid must be at least equal to the starting price.");
                 }
 
                 var bid = new Bid
@@ -122,11 +92,11 @@ namespace KoiFishAuction.Service.Services.Implementation
                     await _unitOfWork.AuctionSessionRepository.SaveAsync();
                 }
 
-                return new ServiceResult(Common.Constant.StatusCode.SuccessStatusCode, "Bidding for this jewelry was successful.");
+                return new ServiceResult<bool>(Common.Constant.StatusCode.SuccessStatusCode, "Bidding for this jewelry was successful.");
             }
             catch (Exception e)
             {
-                return new ServiceResult(Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
             }
         }
     }

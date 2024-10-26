@@ -28,9 +28,6 @@ namespace KoiFishAuction.Data.Configurations
             builder.Property(k => k.CurrentPrice)
                    .HasColumnType("decimal(18,2)");
 
-            builder.Property(k => k.ImageUrl)
-                   .HasMaxLength(500);
-
             builder.Property(k => k.Origin)
                    .HasMaxLength(100);
 
@@ -65,6 +62,12 @@ namespace KoiFishAuction.Data.Configurations
                    .WithOne(n => n.Item)
                    .HasForeignKey(n => n.ItemId)
                    .OnDelete(DeleteBehavior.SetNull);
+
+            // 1 - N: KoiFish - KoiImages
+            builder.HasMany(k => k.KoiImages)
+                   .WithOne(ki => ki.KoiFish)
+                   .HasForeignKey(ki => ki.KoiFishId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -10,7 +10,7 @@ public class AuctionSession
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
     public int Status { get; set; }
-    public int WinnerId { get; set; }
+    public int? WinnerId { get; set; }
     public int CreatorId { get; set; }
     public decimal MinIncrement { get; set; }
 

@@ -23,6 +23,7 @@ namespace KoiFishAuction.Data.Repository
                                                     .Include(koiFish => koiFish.AuctionSessions)
                                                     .Include(koiFish => koiFish.Bids)
                                                     .Include(koiFish => koiFish.Notifications)
+                                                    .Include(KoiFish => KoiFish.KoiImages)
                                                     .FirstOrDefaultAsync(koiFish => koiFish.Id == id);
             return result;
         }
@@ -34,6 +35,7 @@ namespace KoiFishAuction.Data.Repository
                                                     .Include(koiFish => koiFish.Bids)
                                                     .Include(koiFish => koiFish.Notifications)
                                                     .Include(KoiFish => KoiFish.Seller)
+                                                    .Include(KoiFish => KoiFish.KoiImages)
                                                     .Where(koiFish => koiFish.SellerId == sellerid)
                                                     .ToListAsync();
             return result;
