@@ -7,10 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="RequestModels\AuctionHistory\" />
     <Folder Include="RequestModels\Notification\" />
     <Folder Include="RequestModels\Payment\" />
-    <Folder Include="ViewModels\AuctionHistory\" />
     <Folder Include="ViewModels\Notification\" />
     <Folder Include="ViewModels\Payment\" />
   </ItemGroup>
