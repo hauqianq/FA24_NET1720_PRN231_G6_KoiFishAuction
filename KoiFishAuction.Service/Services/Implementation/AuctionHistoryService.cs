@@ -18,7 +18,7 @@ public class AuctionHistoryService : IAuctionHistoryService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<ServiceResult> GetAllAuctionHistory(AuctionHistoryParams auctionHistoryParams)
+    public async Task<ServiceResult<PagedResponse<AuctionHistoryViewModel>>> GetAllAuctionHistory(AuctionHistoryParams auctionHistoryParams)
     {
         var result = await _unitOfWork.AuctionHistoryRepository.GetAllAuctionHistory(
             GetPredicate(auctionHistoryParams),
@@ -30,7 +30,7 @@ public class AuctionHistoryService : IAuctionHistoryService
                 .ThenInclude(a => a.KoiFish));
         if (!result.Any())
         {
-            return new ServiceResult(Constant.StatusCode.FailedStatusCode, Constant.StatusCode.FAIL_READ_MSG);
+            return new ServiceResult<PagedResponse<AuctionHistoryViewModel>>(Constant.StatusCode.FailedStatusCode, Constant.StatusCode.FAIL_READ_MSG);
         }
         
         var responseList = result.Select(ah => new AuctionHistoryViewModel
@@ -55,7 +55,7 @@ public class AuctionHistoryService : IAuctionHistoryService
             responseList.Count(),
             auctionHistoryParams.PageNumber,
             auctionHistoryParams.PageSize);
-        return new ServiceResult(Constant.StatusCode.SuccessStatusCode, Constant.StatusCode.SUCCESS_READ_MSG,
+        return new ServiceResult<PagedResponse<AuctionHistoryViewModel>>(Constant.StatusCode.SuccessStatusCode, Constant.StatusCode.SUCCESS_READ_MSG,
             PagedResponse<AuctionHistoryViewModel>.CreateResponse(resultPagination));
     }
 
