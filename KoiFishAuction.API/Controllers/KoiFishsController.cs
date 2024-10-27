@@ -41,7 +41,7 @@ namespace KoiFishAuction.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateKoiFish([FromBody] CreateKoiFishRequestModel request)
+        public async Task<IActionResult> CreateKoiFish([FromForm] CreateKoiFishRequestModel request)
         {
             if (!ModelState.IsValid)
             {
@@ -56,19 +56,21 @@ namespace KoiFishAuction.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateKoiFish(int id, [FromBody] UpdateKoiFishRequestModel request)
+        public async Task<IActionResult> UpdateKoiFish(int id, [FromForm] UpdateKoiFishRequestModel request, [FromForm] List<IFormFile> newImages)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var result = await _koiFishService.UpdateKoiFishAsync(id, request);
+            var result = await _koiFishService.UpdateKoiFishAsync(id, request, newImages);
             if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
             {
-                BadRequest(result.Message);
+                return BadRequest(result.Message);
             }
             return Ok(result);
         }
+
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteKoiFish(int id)

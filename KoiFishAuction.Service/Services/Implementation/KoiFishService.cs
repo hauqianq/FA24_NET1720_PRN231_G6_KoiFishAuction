@@ -13,12 +13,16 @@ namespace KoiFishAuction.Service.Services.Implementation
         private readonly UnitOfWork _unitOfWork;
         private readonly IFirebaseStorageService _firebaseStorageBusiness;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IKoiImageService _koiImageService;
+        private readonly IFirebaseStorageService _firebaseStorageService;
 
-        public KoiFishService(UnitOfWork unitOfWork, IFirebaseStorageService firebaseStorageBusiness, IHttpContextAccessor httpContextAccessor)
+        public KoiFishService(UnitOfWork unitOfWork, IFirebaseStorageService firebaseStorageBusiness, IHttpContextAccessor httpContextAccessor, IKoiImageService koiImageService, IFirebaseStorageService firebaseStorageService)
         {
             _unitOfWork = unitOfWork;
             _firebaseStorageBusiness = firebaseStorageBusiness;
             _httpContextAccessor = httpContextAccessor;
+            _koiImageService = koiImageService;
+            _firebaseStorageService = firebaseStorageService;
         }
 
         public async Task<bool> CanUpdateKoiFishAsync(int id)
@@ -131,18 +135,11 @@ namespace KoiFishAuction.Service.Services.Implementation
                 {
                     var result = data.Select(KoiFish => new KoiFishViewModel()
                     {
-                        Age = KoiFish.Age,
                         ColorPattern = KoiFish.ColorPattern,
                         CurrentPrice = KoiFish.CurrentPrice,
-                        Description = KoiFish.Description,
                         Id = KoiFish.Id,
-                        Length = KoiFish.Length,
                         Name = KoiFish.Name,
                         Origin = KoiFish.Origin,
-                        SellerUserName = KoiFish.Seller.Username,
-                        StartingPrice = KoiFish.StartingPrice,
-                        Weight = KoiFish.Weight,
-                        Images = KoiFish.KoiImages.Select(x => x.ImageUrl).ToList()
                     }).ToList();
 
                     return new ServiceResult<List<KoiFishViewModel>>(Common.Constant.StatusCode.SuccessStatusCode, result);
@@ -154,7 +151,7 @@ namespace KoiFishAuction.Service.Services.Implementation
             }
         }
 
-        public async Task<ServiceResult<KoiFishViewModel>> GetKoiFishByIdAsync(int id)
+        public async Task<ServiceResult<KoiFishDetailViewModel>> GetKoiFishByIdAsync(int id)
         {
             try
             {
@@ -162,7 +159,7 @@ namespace KoiFishAuction.Service.Services.Implementation
                 if (data != null)
                 {
 
-                    var result = new KoiFishViewModel()
+                    var result = new KoiFishDetailViewModel()
                     {
                         Age = data.Age,
                         ColorPattern = data.ColorPattern,
@@ -178,20 +175,20 @@ namespace KoiFishAuction.Service.Services.Implementation
                         Images = data.KoiImages.Select(x => x.ImageUrl).ToList()
                     };
 
-                    return new ServiceResult<KoiFishViewModel>(Common.Constant.StatusCode.SuccessStatusCode, result);
+                    return new ServiceResult<KoiFishDetailViewModel>(Common.Constant.StatusCode.SuccessStatusCode, result);
                 }
                 else
                 {
-                    return new ServiceResult<KoiFishViewModel>(Common.Constant.StatusCode.FailedStatusCode, "This koiFish does not exist.");
+                    return new ServiceResult<KoiFishDetailViewModel>(Common.Constant.StatusCode.FailedStatusCode, "This koiFish does not exist.");
                 }
             }
             catch (Exception e)
             {
-                return new ServiceResult<KoiFishViewModel>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<KoiFishDetailViewModel>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
             }
         }
 
-        public async Task<ServiceResult<int>> UpdateKoiFishAsync(int id, UpdateKoiFishRequestModel request)
+        public async Task<ServiceResult<int>> UpdateKoiFishAsync(int id, UpdateKoiFishRequestModel request, List<IFormFile> newImages)
         {
             try
             {
@@ -207,10 +204,46 @@ namespace KoiFishAuction.Service.Services.Implementation
                     return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, "The starting price must be greater than 0.");
                 }
 
+                // Cập nhật thông tin cơ bản
                 koiFish.Description = request.Description;
                 koiFish.Name = request.Name;
                 koiFish.StartingPrice = request.StartingPrice;
+                koiFish.CurrentPrice = request.CurrentPrice;
+                koiFish.Age = request.Age;
+                koiFish.Origin = request.Origin;
+                koiFish.Weight = request.Weight;
+                koiFish.Length = request.Length;
+                koiFish.ColorPattern = request.ColorPattern;
 
+                // Xử lý ảnh
+                if (request.ImageUrls != null && request.ImageUrls.Count > 0)
+                {
+                    // Xóa ảnh cũ nếu không còn trong danh sách
+                    var imagesToDelete = koiFish.KoiImages.Where(img => !request.ImageUrls.Contains(img.ImageUrl)).ToList();
+                    foreach (var image in imagesToDelete)
+                    {
+                        // Gọi service để xóa ảnh trong Firebase và database
+                        await _firebaseStorageService.DeleteKoiFishImage(image.ImageUrl);
+                        _unitOfWork.KoiImageRepository.Remove(image);
+                    }
+                }
+
+                // Upload ảnh mới
+                if (newImages != null && newImages.Count > 0)
+                {
+                    foreach (var newImage in newImages)
+                    {
+                        var imageUrl = await _firebaseStorageService.UploadKoiFishImage(newImage);
+                        var koiImage = new KoiImage
+                        {
+                            KoiFishId = koiFish.Id,
+                            ImageUrl = imageUrl
+                        };
+                        _unitOfWork.KoiImageRepository.Create(koiImage);
+                    }
+                }
+
+                // Lưu thay đổi
                 _unitOfWork.KoiFishRepository.Update(koiFish);
                 await _unitOfWork.KoiFishRepository.SaveAsync();
 
@@ -221,7 +254,7 @@ namespace KoiFishAuction.Service.Services.Implementation
                 return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
             }
         }
-
+        
         public async Task<ServiceResult<int>> UpdateKoiFishPriceAsync(int id, decimal price)
         {
             try

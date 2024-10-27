@@ -1,8 +1,7 @@
-﻿using KoiFishAuction.Common.ViewModels.KoiFish;
-using KoiFishAuction.Data.Models;
+﻿using KoiFishAuction.Common.RequestModels.KoiFish;
+using KoiFishAuction.Common.ViewModels.KoiFish;
 using KoiFishAuction.MVC.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace KoiFishAuction.MVC.Controllers
 {
@@ -46,32 +45,14 @@ namespace KoiFishAuction.MVC.Controllers
                     case "Name":
                         koiFishes = koiFishes.OrderBy(k => k.Name).ToList();
                         break;
-                    case "Description":
-                        koiFishes = koiFishes.OrderBy(k => k.Description).ToList();
-                        break;
-                    case "StartingPrice":
-                        koiFishes = koiFishes.OrderBy(k => k.StartingPrice).ToList();
-                        break;
                     case "CurrentPrice":
                         koiFishes = koiFishes.OrderBy(k => k.CurrentPrice).ToList();
-                        break;
-                    case "Age":
-                        koiFishes = koiFishes.OrderBy(k => k.Age).ToList();
                         break;
                     case "Origin":
                         koiFishes = koiFishes.OrderBy(k => k.Origin).ToList();
                         break;
-                    case "Weight":
-                        koiFishes = koiFishes.OrderBy(k => k.Weight).ToList();
-                        break;
-                    case "Length":
-                        koiFishes = koiFishes.OrderBy(k => k.Length).ToList();
-                        break;
                     case "ColorPattern":
                         koiFishes = koiFishes.OrderBy(k => k.ColorPattern).ToList();
-                        break;
-                    case "SellerUsername":
-                        koiFishes = koiFishes.OrderBy(k => k.SellerUserName).ToList();
                         break;
                     default:
                         koiFishes = koiFishes.OrderBy(k => k.Name).ToList();
@@ -83,5 +64,119 @@ namespace KoiFishAuction.MVC.Controllers
 
             return new JsonResult(new List<KoiFishViewModel>());
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var result = await _koiFishApiClient.GetKoiFishByIdAsync(id);
+
+            if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
+            {
+                return View(result.Data);
+            }
+
+            return NotFound();
+        }
+
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(CreateKoiFishRequestModel request)
+        {
+            var result = await _koiFishApiClient.CreateKoiFishAsync(request);
+
+            if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
+            {
+                return RedirectToAction("Index", new { message = "Koi fish created successfully!" });
+            }
+
+            ViewBag.Message = result.Message;   
+
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var koiFish = (await _koiFishApiClient.GetKoiFishByIdAsync(id)).Data;
+            if (koiFish == null)
+            {
+                return NotFound();
+            }
+
+            var model = new KoiFishDetailViewModel
+            {
+                Id = koiFish.Id,
+                Name = koiFish.Name,
+                Description = koiFish.Description,
+                StartingPrice = koiFish.StartingPrice,
+                CurrentPrice = koiFish.CurrentPrice,
+                Age = koiFish.Age,
+                Origin = koiFish.Origin,
+                Weight = koiFish.Weight,
+                Length = koiFish.Length,
+                ColorPattern = koiFish.ColorPattern,
+                Images = koiFish.Images 
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(KoiFishDetailViewModel model, List<IFormFile> newImages)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var request = new UpdateKoiFishRequestModel
+            {
+                Id = model.Id,
+                Name = model.Name,
+                Description = model.Description,
+                StartingPrice = model.StartingPrice,
+                CurrentPrice = model.CurrentPrice,
+                Age = model.Age,
+                Origin = model.Origin,
+                Weight = model.Weight,
+                Length = model.Length,
+                ColorPattern = model.ColorPattern,
+                ImageUrls = model.Images 
+            };
+
+            var result = await _koiFishApiClient.UpdateKoiFishAsync(model.Id, request, newImages);
+            if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
+            {
+                ModelState.AddModelError("", result.Message);
+                return View(model);
+            }
+
+            return RedirectToAction("Details", new { id = model.Id });
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _koiFishApiClient.DeleteKoiFishAsync(id);
+
+            if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
+            {
+                ViewBag.Message = result.Message;
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                ViewBag.Message = result.Message;
+                return RedirectToAction("Index");
+            }
+        }
+
     }
 }

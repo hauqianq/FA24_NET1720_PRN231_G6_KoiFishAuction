@@ -1,0 +1,183 @@
+﻿@model KoiFishAuction.Common.RequestModels.KoiFish.CreateKoiFishRequestModel
+
+@{
+    ViewBag.Title = "Create Koi Fish";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">Create New Koi Fish</h4>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("Create", "KoiFish", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Name" class="control-label">Name</label>
+                                    <input asp-for="Name" class="form-control" placeholder="Enter the Koi fish name" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Age" class="control-label">Age (years)</label>
+                                    <input asp-for="Age" class="form-control" placeholder="Enter age of the Koi fish" />
+                                    <span asp-validation-for="Age" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="StartingPrice" class="control-label">Starting Price ($)</label>
+                                    <input asp-for="StartingPrice" class="form-control" placeholder="Enter starting price" />
+                                    <span asp-validation-for="StartingPrice" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="CurrentPrice" class="control-label">Current Price ($)</label>
+                                    <input asp-for="CurrentPrice" class="form-control" placeholder="Enter current price" />
+                                    <span asp-validation-for="CurrentPrice" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Origin" class="control-label">Origin</label>
+                                    <input asp-for="Origin" class="form-control" placeholder="Enter the country of origin" />
+                                    <span asp-validation-for="Origin" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="ColorPattern" class="control-label">Color Pattern</label>
+                                    <input asp-for="ColorPattern" class="form-control" placeholder="Describe the color pattern" />
+                                    <span asp-validation-for="ColorPattern" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Weight" class="control-label">Weight (kg)</label>
+                                    <input asp-for="Weight" class="form-control" placeholder="Enter the weight of the Koi fish" />
+                                    <span asp-validation-for="Weight" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Length" class="control-label">Length (cm)</label>
+                                    <input asp-for="Length" class="form-control" placeholder="Enter the length of the Koi fish" />
+                                    <span asp-validation-for="Length" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Description" class="control-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Provide a description"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="Images" class="control-label">Upload Images</label>
+                            <input asp-for="Images" class="form-control-file" id="fileUpload" type="file" multiple accept="image/*" />
+                            <small class="form-text text-muted">You can upload multiple images. Hold Ctrl (or Cmd on Mac) to select multiple files.</small>
+                            <span asp-validation-for="Images" class="text-danger"></span>
+
+                            <!-- Khu vực xem trước ảnh đã upload -->
+                            <div class="preview-images mt-3">
+                                <h6>Preview:</h6>
+                                <div id="preview-container" class="row"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group text-right">
+                            <button type="submit" class="btn btn-success">Create</button>
+                            <a href="@Url.Action("Index", "KoiFish")" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <!-- Script cho việc xem trước ảnh và xóa ảnh nếu upload nhầm -->
+    <script>
+        // Lưu các file đã chọn vào một mảng
+        let selectedFiles = [];
+
+        // Hàm xử lý khi người dùng chọn ảnh
+        document.getElementById("fileUpload").addEventListener("change", function (event) {
+            const files = event.target.files;
+            const previewContainer = document.getElementById("preview-container");
+
+            // Lặp qua từng file và thêm vào danh sách preview
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+
+                // Chỉ xử lý file ảnh
+                if (file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        // Tạo phần tử HTML cho mỗi ảnh
+                        const colDiv = document.createElement("div");
+                        colDiv.classList.add("col-md-3", "mb-2");
+
+                        const imageDiv = document.createElement("div");
+                        imageDiv.classList.add("image-preview");
+
+                        const img = document.createElement("img");
+                        img.src = e.target.result;
+                        img.classList.add("img-fluid", "img-thumbnail");
+
+                        // Nút xóa ảnh
+                        const removeButton = document.createElement("button");
+                        removeButton.textContent = "Remove";
+                        removeButton.classList.add("btn", "btn-danger", "btn-sm", "mt-2", "w-100");
+                        removeButton.onclick = function () {
+                            // Xóa phần tử hình ảnh khỏi view
+                            previewContainer.removeChild(colDiv);
+
+                            // Xóa file khỏi danh sách selectedFiles
+                            selectedFiles = selectedFiles.filter(f => f.name !== file.name);
+                        };
+
+                        imageDiv.appendChild(img);
+                        imageDiv.appendChild(removeButton);
+                        colDiv.appendChild(imageDiv);
+                        previewContainer.appendChild(colDiv);
+
+                        // Thêm file vào mảng selectedFiles
+                        selectedFiles.push(file);
+                    };
+
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            // Cập nhật input file với selectedFiles mới
+            updateFileInput();
+        });
+
+        // Hàm để cập nhật input file với danh sách file đã chọn
+        function updateFileInput() {
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => dataTransfer.items.add(file));
+            document.getElementById("fileUpload").files = dataTransfer.files;
+        }
+    </script>
+}

@@ -3,7 +3,7 @@ using KoiFishAuction.Service.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
-namespace JewelryAuction.Business.Business.Implementation
+namespace KoiFishAuction.Service.Services.Implementation
 {
     public class FirebaseStorageService : IFirebaseStorageService
     {
@@ -29,5 +29,24 @@ namespace JewelryAuction.Business.Business.Implementation
 
             return await task.GetDownloadUrlAsync();
         }
+
+        public async Task DeleteKoiFishImage(string imageUrl)
+        {
+            try
+            {
+                string firebaseBucket = _configuration["Firebase:StorageBucket"];
+                var firebaseStorage = new FirebaseStorage(firebaseBucket);
+
+                // Tìm đường dẫn trong Firebase để xóa ảnh
+                var storagePath = new Uri(imageUrl).AbsolutePath.Split(new string[] { "/o/" }, StringSplitOptions.None)[1].Split('?')[0];
+                await firebaseStorage.Child(storagePath).DeleteAsync();
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Failed to delete image from Firebase: " + e.Message);
+            }
+        }
+
+
     }
 }

@@ -102,5 +102,18 @@ namespace KoiFishAuction.Data
                 return notificationRepository;
             }
         }
+
+        private KoiImageRepository koiImageRepository;
+        public KoiImageRepository KoiImageRepository
+        {
+            get
+            {
+                if (koiImageRepository == null)
+                {
+                    koiImageRepository = new KoiImageRepository(_context);
+                }
+                return koiImageRepository;
+            }
+        }
     }
 }

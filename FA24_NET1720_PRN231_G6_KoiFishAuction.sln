@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KoiFishAuction.Common", "Ko
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KoiFishAuction.Service", "KoiFishAuction.Service\KoiFishAuction.Service.csproj", "{464E96DF-D139-42CB-90CD-CDFD88020EEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KoiFishAuction.MVC", "KoiFishAuction.MVC\KoiFishAuction.MVC.csproj", "{CB4E79BE-C077-4BC9-9291-8A1EC38B2473}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KoiFishAuction.MVC", "KoiFishAuction.MVC\KoiFishAuction.MVC.csproj", "{CB4E79BE-C077-4BC9-9291-8A1EC38B2473}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

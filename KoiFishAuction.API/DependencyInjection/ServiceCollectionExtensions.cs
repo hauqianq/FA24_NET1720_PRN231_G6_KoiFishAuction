@@ -66,12 +66,14 @@ namespace KoiFishAuction.API.DependencyInjection
             services.AddScoped<BidRepository>();
             services.AddScoped<AuctionSessionRepository>();
             services.AddScoped<KoiFishRepository>();
+            services.AddScoped<KoiImageRepository>();
 
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IBidService, BidService>();
             services.AddScoped<IAuctionSessionService, AuctionSessionService>();
             services.AddScoped<IKoiFishService, KoiFishService>();
+            services.AddScoped<IKoiImageService, KoiImageService>();
 
 
             return services;

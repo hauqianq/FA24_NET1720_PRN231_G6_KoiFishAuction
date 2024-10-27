@@ -1,0 +1,127 @@
+﻿@model KoiFishAuction.Common.ViewModels.KoiFish.KoiFishDetailViewModel
+
+@{
+    ViewBag.Title = "Koi Fish Details";
+}
+
+<!-- Include Bootstrap CSS (nếu chưa bao gồm trong layout) -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">@Model.Name</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Image Carousel -->
+                <div class="col-md-6">
+                    @if (Model.Images != null && Model.Images.Count > 0)
+                    {
+                        <div id="koiFishCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-indicators">
+                                @for (int i = 0; i < Model.Images.Count; i++)
+                                {
+                                    <button type="button" data-bs-target="#koiFishCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i + 1)"></button>
+                                }
+                            </div>
+                            <div class="carousel-inner">
+                                @for (int i = 0; i < Model.Images.Count; i++)
+                                {
+                                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                                        <img src="@Model.Images[i]" class="d-block w-100 img-fluid rounded" alt="Koi Fish Image @(i + 1)" style="height: 300px; object-fit: contain;">
+                                    </div>
+                                }
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#koiFishCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#koiFishCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <img src="~/images/default-koi.jpg" alt="Default Koi Fish Image" class="img-fluid rounded" style="height: 300px; object-fit: contain;">
+                    }
+                </div>
+                <!-- Details Section -->
+                <div class="col-md-6">
+                    <h4 class="text-secondary">Description</h4>
+                    <p>@Model.Description</p>
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Starting Price:</th>
+                                <td>@Model.StartingPrice.ToString("C")</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Current Price:</th>
+                                <td>@Model.CurrentPrice.ToString("C")</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Age:</th>
+                                <td>@Model.Age @Html.Raw(Model.Age > 1 ? "years" : "year")</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Origin:</th>
+                                <td>@Model.Origin</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Weight:</th>
+                                <td>@Model.Weight kg</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Length:</th>
+                                <td>@Model.Length cm</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Color Pattern:</th>
+                                <td>@Model.ColorPattern</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Seller:</th>
+                                <td>@Model.SellerUserName</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <a href="@Url.Action("Index", "KoiFish")" class="btn btn-outline-primary mt-3">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include FontAwesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+
+<!-- Include Bootstrap JS (v5) and its dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Optional: Custom CSS to further adjust image sizes if needed -->
+<style>
+    /* Điều chỉnh chiều cao carousel và hình ảnh để không bị cắt */
+    #koiFishCarousel .carousel-item img {
+        height: 300px; /* Điều chỉnh chiều cao theo ý bạn */
+        object-fit: contain; /* Đảm bảo hình ảnh không bị cắt */
+    }
+
+    /* Đảm bảo rằng hình ảnh mặc định cũng được hiển thị đầy đủ */
+    img.img-fluid {
+        height: 300px; /* Điều chỉnh chiều cao theo ý bạn */
+        object-fit: contain; /* Đảm bảo hình ảnh không bị cắt */
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        #koiFishCarousel .carousel-item img,
+        img.img-fluid {
+            height: 200px; /* Điều chỉnh chiều cao cho thiết bị di động */
+        }
+    }
+</style>

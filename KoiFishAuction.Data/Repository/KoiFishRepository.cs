@@ -24,6 +24,7 @@ namespace KoiFishAuction.Data.Repository
                                                     .Include(koiFish => koiFish.Bids)
                                                     .Include(koiFish => koiFish.Notifications)
                                                     .Include(KoiFish => KoiFish.KoiImages)
+                                                    .Include(KoiFish => KoiFish.Seller)
                                                     .FirstOrDefaultAsync(koiFish => koiFish.Id == id);
             return result;
         }
