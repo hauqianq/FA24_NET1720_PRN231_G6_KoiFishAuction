@@ -7,10 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="RequestModels\Notification\" />
-    <Folder Include="RequestModels\Payment\" />
-    <Folder Include="ViewModels\Notification\" />
-    <Folder Include="ViewModels\Payment\" />
+    <Compile Remove="RequestModels\Payment\**" />
+    <Compile Remove="ViewModels\Payment\**" />
+    <EmbeddedResource Remove="RequestModels\Payment\**" />
+    <EmbeddedResource Remove="ViewModels\Payment\**" />
+    <None Remove="RequestModels\Payment\**" />
+    <None Remove="ViewModels\Payment\**" />
   </ItemGroup>
 
   <ItemGroup>
