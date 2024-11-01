@@ -6,13 +6,6 @@
         public static class EndPoint
         {
             public static string APIEndPoint = "https://localhost:7143/api/";
-
-            public static class UserEndPoint
-            {
-                public static string LoginEndPoint = "/user/login";
-                public static string RegisterEndPoint = "/user/register";
-                public static string UpdateUserEndPoint = "/user/update";
-            }
         }
 
         public static class StatusCode

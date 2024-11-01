@@ -14,10 +14,4 @@
     <ProjectReference Include="..\KoiFishAuction.Service\KoiFishAuction.Service.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Views\User\AuctionSession\" />
-    <Folder Include="Views\User\Profile\" />
-    <Folder Include="Views\User\KoiFish\" />
-  </ItemGroup>
-
 </Project>

@@ -27,13 +27,14 @@ namespace KoiFishAuction.Service.Services.Implementation
                 var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userid);
                 if (user == null)
                 {
-                    return new ServiceResult<UserViewModel>(Common.Constant.StatusCode.FailedStatusCode);
+                    return new ServiceResult<UserViewModel>(Common.Constant.StatusCode.FailedStatusCode, "User does not exist");
                 }
 
                 var data = new UserViewModel
                 {
                     Id = user.Id,
                     Username = user.Username,
+                    Password = user.Password,
                     Email = user.Email,
                     Balance = user.Balance,
                     Address = user.Address,
@@ -97,35 +98,35 @@ namespace KoiFishAuction.Service.Services.Implementation
 
                 if (result == null)
                 {
-                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "Register failed.");
+                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "Register failed.", false);
                 }
 
-                return new ServiceResult<bool>(Common.Constant.StatusCode.SuccessStatusCode, "Register successfully.");
+                return new ServiceResult<bool>(Common.Constant.StatusCode.SuccessStatusCode, "Register successfully.", true);
             }
             catch (Exception e)
             {
-                return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, e.Message, false);
             }
         }
 
-        public async Task<ServiceResult<bool>> UpdateUserAsync(UpdateUserRequestModel request)
+        public async Task<ServiceResult<bool>> UpdateUserAsync(int id, UpdateUserRequestModel request)
         {
             try
             {
-                var user = await _unitOfWork.UserRepository.GetUserByIdAsync(request.UserId);
+                var user = await _unitOfWork.UserRepository.GetUserByIdAsync(id);
                 if (user == null)
                 {
-                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "User not found.");
+                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "User not found.", false);
                 }
 
                 if (request.Password != user.Password)
                 {
-                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "Incorrect password.");
+                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "Incorrect password.", false);
                 }
 
                 if (request.Balance <= 0 || request.Balance <= user.Balance)
                 {
-                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "The new balance must be greater than current balance.");
+                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "The new balance must be greater than current balance.", false);
                 }
 
                 user.Balance = request.Balance;
@@ -136,11 +137,11 @@ namespace KoiFishAuction.Service.Services.Implementation
                 await _unitOfWork.UserRepository.UpdateAsync(user);
                 await _unitOfWork.UserRepository.SaveAsync();
 
-                return new ServiceResult<bool>(Common.Constant.StatusCode.SuccessStatusCode, "Update user successfully.");
+                return new ServiceResult<bool>(Common.Constant.StatusCode.SuccessStatusCode, "Update user successfully.", true);
             }
             catch (Exception e)
             {
-                return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, e.Message, false);
             }
         }
     }

@@ -1,0 +1,50 @@
+﻿@model IEnumerable<KoiFishAuction.Common.ViewModels.AuctionSession.AuctionSessionViewModel>
+
+@{
+    ViewBag.Title = "Koi Fish Auction Sessions";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Koi Fish Auction Sessions</h2>
+    <table class="table table-striped table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Name</th>
+                <th>Koi Fish Name</th>
+                <th>Price</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var session in Model)
+            {
+                <tr>
+                    <td>
+                        <a href="@Url.Action("Details", "AuctionSession", new { id = session.Id })" class="text-decoration-none">
+                            @session.Name
+                        </a>
+                    </td>
+                    <td>@session.KoiFishName</td>
+                    <td>@session.Price.ToString("C")</td>
+                    <td>@session.StartTime.ToString("f")</td>
+                    <td>@session.EndTime.ToString("f")</td>
+                    <td>
+                        <span class="badge
+                            @(session.Status == KoiFishAuction.Data.Enumerrations.AuctionSessionStatus.Opening.ToString() ? "bg-success" :
+                              session.Status == KoiFishAuction.Data.Enumerrations.AuctionSessionStatus.Closed.ToString() ? "bg-danger" :
+                              "bg-secondary")">
+                            @session.Status
+                        </span>
+                    </td>
+                    <td>
+                        <a href="@Url.Action("Update", "AuctionSession", new { id = session.Id })" class="btn btn-warning btn-sm">Update</a>
+                        <a href="@Url.Action("Delete", "AuctionSession", new { id = session.Id })" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

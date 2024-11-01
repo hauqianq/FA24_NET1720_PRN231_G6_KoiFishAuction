@@ -1,0 +1,142 @@
+﻿@model KoiFishAuction.Common.ViewModels.User.UpdateUserRequestModel
+@{
+    ViewData["Title"] = "Update Profile";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Profile - Online Koi Fish Auction System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main {
+            max-width: 600px;
+            padding: 20px;
+            margin: 20px auto; /* Căn giữa theo chiều ngang, giữ nguyên margin trên và dưới */
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .heading {
+            font-size: 1.5rem;
+            color: #333;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            padding: 0.6rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+            .form-control[readonly] {
+                background-color: #e9ecef;
+                color: #6c757d;
+            }
+
+        .form-submit {
+            background-color: #007bff;
+            color: #fff;
+            padding: 0.8rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+            .form-submit:hover {
+                background-color: #0056b3;
+            }
+
+        .text-danger {
+            font-size: 0.85rem;
+            color: #e74c3c;
+            margin-top: 0.25rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+            .footer a {
+                color: #007bff;
+                text-decoration: none;
+            }
+
+                .footer a:hover {
+                    text-decoration: underline;
+                }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <form method="post" class="form">
+            <h3 class="heading">Update Profile</h3>
+
+            <input type="hidden" asp-for="UserId"  value="@Model.UserId"/>
+
+            <div class="form-group">
+                <label asp-for="Username" class="form-label">Username</label>
+                <input asp-for="Username" class="form-control" value="@Model.Username" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password" class="form-label">Password</label>
+                <input type="password" asp-for="Password" class="form-control" value="@Model.Password"/>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" class="form-control" value="@Model.Email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Balance" class="form-label">Balance</label>
+                <input asp-for="Balance" class="form-control" value="@Model.Balance" />
+            </div>
+
+            <button type="submit" class="form-submit">Save Changes</button>
+
+            <div class="footer">
+                <a asp-controller="AuctionSession" asp-action="Index">Cancel</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

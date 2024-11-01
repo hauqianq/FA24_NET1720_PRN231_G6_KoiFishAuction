@@ -2,7 +2,6 @@
 using KoiFishAuction.MVC.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using NuGet.Common;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace KoiFishAuction.MVC.Controllers
@@ -55,6 +54,7 @@ namespace KoiFishAuction.MVC.Controllers
             var jwtToken = handler.ReadJwtToken(token);
 
             HttpContext.Session.SetString("UserName", JsonConvert.SerializeObject(jwtToken.Claims.FirstOrDefault(c => c.Type == "username")?.Value));
+            HttpContext.Session.SetInt32("id", int.Parse(jwtToken.Claims.FirstOrDefault(c => c.Type == "id")?.Value));
         }
 
     }

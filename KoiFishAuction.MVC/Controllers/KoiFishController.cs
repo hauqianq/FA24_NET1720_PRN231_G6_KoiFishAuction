@@ -23,7 +23,7 @@ namespace KoiFishAuction.MVC.Controllers
 
             ViewBag.Message = message;
 
-            return View(result.Data);
+            return View("~/Views/User/KoiFish/Index.cshtml", result.Data);
         }
 
         [HttpGet]
@@ -92,7 +92,7 @@ namespace KoiFishAuction.MVC.Controllers
 
             if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
             {
-                return RedirectToAction("Index", new { message = "Koi fish created successfully!" });
+                return RedirectToAction("~/Views/User/KoiFish/Index.cshtml", new { message = "Koi fish created successfully!" });
             }
 
             ViewBag.Message = result.Message;   
@@ -157,7 +157,7 @@ namespace KoiFishAuction.MVC.Controllers
                 return View(model);
             }
 
-            return RedirectToAction("Details", new { id = model.Id });
+            return RedirectToAction("~/Views/User/KoiFish/Details.cshtml", new { id = model.Id });
         }
 
 
@@ -169,12 +169,12 @@ namespace KoiFishAuction.MVC.Controllers
             if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
             {
                 ViewBag.Message = result.Message;
-                return RedirectToAction("Index");
+                return RedirectToAction("~/Views/User/KoiFish/Index.cshtml");
             }
             else
             {
                 ViewBag.Message = result.Message;
-                return RedirectToAction("Index");
+                return RedirectToAction("~/Views/User/KoiFish/Index.cshtml");
             }
         }
 

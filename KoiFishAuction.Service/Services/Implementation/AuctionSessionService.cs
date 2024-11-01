@@ -152,8 +152,9 @@ namespace JewelryAuction.Business.Business.Implementation
                         KoiFishName = auc.KoiFish.Name,
                         StartTime = auc.StartTime,
                         EndTime = auc.EndTime,
-                        Status = auc.Status.ToString(),
+                        Status = ((AuctionSessionStatus)auc.Status).ToString(),
                         Price = auc.KoiFish.CurrentPrice,
+                        Image = auc.KoiFish.KoiImages.Select(KoiFish => KoiFish.ImageUrl).FirstOrDefault()
                     }).ToList();
 
                     return new ServiceResult<List<AuctionSessionViewModel>>(KoiFishAuction.Common.Constant.StatusCode.SuccessStatusCode, result);

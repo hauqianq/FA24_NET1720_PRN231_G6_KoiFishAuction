@@ -7,7 +7,7 @@ namespace KoiFishAuction.Service.Services.Interface
     {
         Task<ServiceResult<bool>> RegisterUserAsync(RegisterUserRequestModel request);
         Task<ServiceResult<string>> LoginUserAsync(LoginUserRequestModel request);
-        Task<ServiceResult<bool>> UpdateUserAsync(UpdateUserRequestModel request);
+        Task<ServiceResult<bool>> UpdateUserAsync(int id, UpdateUserRequestModel request);
         Task<ServiceResult<UserViewModel>> GetUserByIdAsync(int userid);
     }
 }

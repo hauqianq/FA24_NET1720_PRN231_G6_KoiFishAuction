@@ -21,13 +21,19 @@ namespace KoiFishAuction.Data.Repository
                                                 .Include(a => a.Creator)
                                                 .Include(a => a.KoiFish).ThenInclude(k => k.KoiImages)
                                                 .Include(a => a.Bids)
-                                            .Where(a => a.Status == (int)AuctionSessionStatus.Opening)
-                                            .ToListAsync();
+                                                .Where(a => a.Status == (int)AuctionSessionStatus.Opening)
+                                                .ToListAsync();
         }
 
         public async Task<List<AuctionSession>> GetAuctionSessionForUserAsync(int userid)
         {
-            var auctions = await _context.AuctionSessions.Where(a => a.CreatorId == userid).ToListAsync();
+            var auctions = await _context.AuctionSessions.Include(a => a.Winner)
+                                                .Include(a => a.Creator)
+                                                .Include(a => a.KoiFish).ThenInclude(k => k.KoiImages)
+                                                .Include(a => a.Bids)
+                                                .Where(a => a.CreatorId == userid)
+                                                .ToListAsync();
+
             foreach (var auction in auctions)
             {
                 if (auction.EndTime <= DateTime.Now && auction.Status != (int)AuctionSessionStatus.Closed)
@@ -36,12 +42,9 @@ namespace KoiFishAuction.Data.Repository
                 }
             }
 
-            return await _context.AuctionSessions.Include(a => a.KoiFish)
-                                            .Include(a => a.Winner)
-                                            .Include(a => a.Creator)
-                                            .Include(a => a.Bids)
-                                            .Where(a => a.CreatorId == userid).ToListAsync();
+            return auctions;
         }
+
 
         public async Task<AuctionSession> GetAuctionSessionByIdAsync(int id)
         {

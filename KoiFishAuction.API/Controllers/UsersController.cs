@@ -1,4 +1,5 @@
 ﻿using KoiFishAuction.Common.RequestModels.User;
+using KoiFishAuction.Common.ViewModels.User;
 using KoiFishAuction.Service.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,10 +38,21 @@ namespace KoiFishAuction.API.Controllers
             return Ok(result);
         }
 
-        [HttpPut("update")]
-        public async Task<IActionResult> Update([FromBody] LoginUserRequestModel request)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(int id)
         {
-            var result = await _userService.LoginUserAsync(request);
+            var result = await _userService.GetUserByIdAsync(id);
+            if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
+            {
+                BadRequest(result.Message);
+            }
+            return Ok(result);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id,[FromBody] UpdateUserRequestModel request)
+        {
+            var result = await _userService.UpdateUserAsync(id, request);
             if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
             {
                 BadRequest(result.Message);

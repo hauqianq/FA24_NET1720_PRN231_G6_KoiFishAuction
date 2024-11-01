@@ -1,4 +1,5 @@
-﻿using KoiFishAuction.Common.ViewModels.AuctionSession;
+﻿using KoiFishAuction.Common.RequestModels.AuctionSession;
+using KoiFishAuction.Common.ViewModels.AuctionSession;
 using KoiFishAuction.MVC.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,6 +30,15 @@ namespace KoiFishAuction.MVC.Controllers
             ViewBag.Message = result.Message;
 
             return View(result.Data);
+        }
+
+        public async Task<IActionResult> GetAuctionSessionForUser()
+        {
+            var result = await _auctionSessionApiClient.GetAuctionSessionForUserAsync();
+
+            ViewBag.Message = result.Message;
+
+            return View("~/Views/User/AuctionSession/Index.cshtml", result.Data);
         }
     }
 }

@@ -89,18 +89,6 @@
                 @ViewBag.Message
             </div>
         }
-
-        <div class="header-container">
-            <div class="search-container">
-                @using (Html.BeginForm("Index", "Auctions", FormMethod.Post, new { @class = "form" }))
-                {
-                    <input type="text" name="SearchQuery" class="form-control search-input" placeholder="Search by Jewelry Name" />
-                    <button type="submit" class="btn btn-primary search-button">Search</button>
-                }
-            </div>
-            <a href="@Url.Action("Create", "Auctions")" class="btn btn-light create-button">Create New Auction</a>
-        </div>
-
         @if (Model != null && Model.Any())
         {
             foreach (var item in Model)

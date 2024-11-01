@@ -56,12 +56,12 @@ namespace KoiFishAuction.MVC.Services.Implements
             var json = JsonConvert.SerializeObject(request);
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await client.PostAsync(Common.Constant.EndPoint.UserEndPoint.RegisterEndPoint, httpContent);
+            var response = await client.PostAsync($"/api/users/register", httpContent);
             
             return JsonConvert.DeserializeObject<ServiceResult<bool>>(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<ServiceResult<bool>> UpdateUserAsync(UpdateUserRequestModel request)
+        public async Task<ServiceResult<bool>> UpdateUserAsync(int id, UpdateUserRequestModel request)
         {
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(Common.Constant.EndPoint.APIEndPoint);
@@ -72,7 +72,7 @@ namespace KoiFishAuction.MVC.Services.Implements
             var json = JsonConvert.SerializeObject(request);
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await client.PostAsync(Common.Constant.EndPoint.UserEndPoint.UpdateUserEndPoint, httpContent);
+            var response = await client.PutAsync($"/api/users/{id}", httpContent);
             
             return JsonConvert.DeserializeObject<ServiceResult<bool>>(await response.Content.ReadAsStringAsync());
         }
