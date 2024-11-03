@@ -4,5 +4,5 @@ public class UpdateNotificationRequestModel {
     public required string Message { get; set; }
     public required string Type { get; set; }
     public bool IsRead { get; set; }
-    public string? Remarks { get; set; }
+    public string Remarks { get; set; }
 }
