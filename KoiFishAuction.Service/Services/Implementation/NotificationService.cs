@@ -2,11 +2,8 @@
 using KoiFishAuction.Common.Helpers;
 using KoiFishAuction.Common.RequestModels.Notification;
 using KoiFishAuction.Common.ViewModels.AuctionHistory;
-using KoiFishAuction.Common.ViewModels.AuctionSession;
-using KoiFishAuction.Common.ViewModels.Bid;
 using KoiFishAuction.Common.ViewModels.Notification;
 using KoiFishAuction.Data;
-using KoiFishAuction.Data.Enumerrations;
 using KoiFishAuction.Data.Models;
 using KoiFishAuction.Service.Extensions;
 using Microsoft.AspNetCore.Http;
@@ -19,7 +16,7 @@ public interface INotificationService {
     Task<ServiceResult<PagedResponse<NotificationViewModel>>> GetAllNotifications(GetNotificationsRequestModel request);
     Task<ServiceResult<NotificationViewModel>> GetNotificationById(int NotiId);
     Task<ServiceResult<int>> AddNotification(CreateNotificationRequestModel request);
-    Task<ServiceResult<int>> UpdateNotification(UpdateNotificationRequestModel request);
+    Task<ServiceResult<int>> UpdateNotification(int id, UpdateNotificationRequestModel request);
     Task<ServiceResult<bool>> DeleteNotification(int NotiId);
 }
 
@@ -51,7 +48,7 @@ public class NotificationService : INotificationService {
             Id = n.Id,
             Message = n.Message,
             Type = n.Type,
-            IsRead = n.IsRead,
+            IsRead = (bool)n.IsRead!,
             Date = n.Date,
             BidId = n.BidId,
             Remarks = n.Remarks,    
@@ -83,7 +80,7 @@ public class NotificationService : INotificationService {
                 Date = DateTime.Now,
                 IsRead = false,
                 BidId = request.BidId, 
-                Remarks = request.Remarks!
+                Remarks = request.Remarks
             };
 
             await _unitOfWork.NotificationRepository.CreateAsync(noti);
@@ -113,7 +110,7 @@ public class NotificationService : INotificationService {
                 Id = notification.Id,
                 Message = notification.Message,
                 Type = notification.Type,
-                IsRead = notification.IsRead,
+                IsRead = (bool)notification.IsRead!,
                 Date = notification.Date,
                 BidId = notification.BidId,
                 Remarks = notification.Remarks,
@@ -132,9 +129,13 @@ public class NotificationService : INotificationService {
         }
     }
 
-    public async Task<ServiceResult<int>> UpdateNotification(UpdateNotificationRequestModel request) {
+    public async Task<ServiceResult<int>> UpdateNotification(int id, UpdateNotificationRequestModel request) {
         try {
-            var notification = await _unitOfWork.NotificationRepository.GetByIdAsync(request.Id);
+            if (id != request.Id) {
+                return new ServiceResult<int>(Constant.StatusCode.FailedStatusCode);    
+            }
+
+            var notification = await _unitOfWork.NotificationRepository.GetByIdAsync(id);
             if (notification == null) {
                 return new ServiceResult<int>(Constant.StatusCode.FailedStatusCode);
             }
@@ -142,7 +143,7 @@ public class NotificationService : INotificationService {
             notification.Message = request.Message;
             notification.Type = request.Type;
             notification.IsRead = request.IsRead;
-            notification.Remarks = request.Remarks!;
+            notification.Remarks = request.Remarks;
 
             await _unitOfWork.NotificationRepository.UpdateAsync(notification);
             await _unitOfWork.NotificationRepository.SaveAsync();
@@ -199,8 +200,12 @@ public class NotificationService : INotificationService {
             }
         }
 
-        if (!string.IsNullOrEmpty(request.Type) && request.Type != "All") {
+        if (!string.IsNullOrEmpty(request.Type)) {
             predicate = predicate.AndAlso(x => x.Type == request.Type);
+        }
+
+        if (!string.IsNullOrEmpty(request.Message)) {
+            predicate = predicate.AndAlso(x => x.Message == request.Message);
         }
 
         if (!string.IsNullOrEmpty(request.FishPriceRange) && request.FishPriceRange != "All") {

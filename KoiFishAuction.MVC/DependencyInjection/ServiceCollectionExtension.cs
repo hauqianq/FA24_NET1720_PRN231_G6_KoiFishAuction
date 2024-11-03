@@ -1,6 +1,7 @@
 ﻿using KoiFishAuction.MVC.Services.Implements;
 using KoiFishAuction.MVC.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Net.Http.Headers;
 
 namespace KoiFishAuction.MVC.DependencyInjection
 {
@@ -30,6 +31,23 @@ namespace KoiFishAuction.MVC.DependencyInjection
             services.AddScoped<IKoiFishApiClient, KoiFishApiClient>();
             services.AddScoped<IBidApiClient, BidApiClient>();
             services.AddScoped<IAuctionSessionApiClient, AuctionSessionApiClient>();
+
+            services.AddHttpClient<NotificationApiClient>(static (sp, client) => {
+                var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
+                
+                client.BaseAddress = new Uri(Common.Constant.EndPoint.APIEndPoint);
+
+                var session = httpContextAccessor.HttpContext?.Session.GetString("Token");
+                if (!string.IsNullOrEmpty(session)) {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session);
+                }
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => {
+                return new SocketsHttpHandler {
+                    PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+                };
+            })
+            .SetHandlerLifetime(Timeout.InfiniteTimeSpan);
 
             return services;
         }
