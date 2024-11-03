@@ -13,9 +13,10 @@
         <input type="hidden" id="SortOrder" value="" />
     </div>
 
+    <!-- Toast Message -->
     @if (!string.IsNullOrEmpty(ViewBag.Message))
     {
-        <div class="alert alert-info" id="message" role="alert">
+        <div id="toastMessage" class="toast-message">
             @ViewBag.Message
         </div>
     }
@@ -56,6 +57,23 @@
     </table>
 </div>
 
+<style>
+    /* Toast CSS */
+    .toast-message {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: #17a2b8;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        opacity: 1;
+        transition: opacity 0.5s ease;
+        z-index: 10;
+    }
+</style>
+
 @section Scripts {
     <script>
         function searchKoiFishes() {
@@ -70,17 +88,17 @@
                     tableBody.empty();
                     $.each(data, function (i, item) {
                         var row = `<tr>
-                                                <td><a href="/KoiFish/Details?id=${item.id}">${item.name}</a></td>
-                                                <td>${parseFloat(item.currentPrice).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
-                                                <td>${item.origin}</td>
-                                                <td>${item.colorPattern}</td>
-                                                <td>
-                                                    <a href="/KoiFish/Edit?id=${item.id}" class="btn btn-outline-info btn-sm">Edit</a>
-                                                    <form method="post" action="/KoiFish/Delete/${item.id}" style="display:inline;" onsubmit="return confirmDelete();">
-                                                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-                                                    </form>
-                                                </td>
-                                            </tr>`;
+                                                        <td><a href="/KoiFish/Details?id=${item.id}">${item.name}</a></td>
+                                                        <td>${parseFloat(item.currentPrice).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                                                        <td>${item.origin}</td>
+                                                        <td>${item.colorPattern}</td>
+                                                        <td>
+                                                            <a href="/KoiFish/Edit?id=${item.id}" class="btn btn-outline-info btn-sm">Edit</a>
+                                                            <form method="post" action="/KoiFish/Delete/${item.id}" style="display:inline;" onsubmit="return confirmDelete();">
+                                                                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                                            </form>
+                                                        </td>
+                                                    </tr>`;
                         tableBody.append(row);
                     });
                 },
@@ -101,11 +119,11 @@
             searchKoiFishes();
         }
 
-        // Fade out the message alert after 2 seconds
+        // Toast fade out after 3 seconds
         $(document).ready(function () {
             setTimeout(function () {
-                $('#message').fadeOut('slow');
-            }, 2000);
+                $('#toastMessage').fadeOut('slow');
+            }, 3000);
         });
     </script>
 }

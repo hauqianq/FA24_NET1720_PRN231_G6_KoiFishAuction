@@ -120,13 +120,11 @@ namespace KoiFishAuction.Service.Services.Implementation
             }
         }
 
-        public async Task<ServiceResult<List<KoiFishViewModel>>> GetAllKoiFishesAsync()
+        public async Task<ServiceResult<List<KoiFishViewModel>>> GetAllKoiFishesAsync(int userId)
         {
             try
             {
-                var user = await _unitOfWork.UserRepository.GetUserByIdAsync(int.Parse(_httpContextAccessor.GetCurrentUserId()));
-
-                var data = await _unitOfWork.KoiFishRepository.GetAllKoiFishesAsync(user.Id);
+                var data = await _unitOfWork.KoiFishRepository.GetAllKoiFishesAsync(userId);
                 if (data.Count == 0)
                 {
                     return new ServiceResult<List<KoiFishViewModel>>(Common.Constant.StatusCode.SuccessStatusCode, "You do not currently own any koiFish.");

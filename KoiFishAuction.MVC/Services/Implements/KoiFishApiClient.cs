@@ -72,7 +72,7 @@ namespace KoiFishAuction.MVC.Services.Implements
             return JsonConvert.DeserializeObject<ServiceResult<bool>>(result);
         }
 
-        public async Task<ServiceResult<List<KoiFishViewModel>>> GetAllKoiFishesAsync()
+        public async Task<ServiceResult<List<KoiFishViewModel>>> GetAllKoiFishesAsync(int userId)
         {
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(Common.Constant.EndPoint.APIEndPoint);
@@ -80,7 +80,7 @@ namespace KoiFishAuction.MVC.Services.Implements
             var session = _httpContextAccessor.HttpContext.Session.GetString("Token");
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session);
 
-            var response = await client.GetAsync($"/api/KoiFish");
+            var response = await client.GetAsync($"/api/KoiFish/user/{userId}");
             var result = await response.Content.ReadAsStringAsync();
 
             return JsonConvert.DeserializeObject<ServiceResult<List<KoiFishViewModel>>>(result);

@@ -17,10 +17,10 @@ namespace KoiFishAuction.API.Controllers
             _koiFishService = koiFishService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllKoiFish()
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetAllKoiFish(int userId)
         {
-            var result = await _koiFishService.GetAllKoiFishesAsync();
+            var result = await _koiFishService.GetAllKoiFishesAsync(userId);
             if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
             {
                 BadRequest(result.Message);

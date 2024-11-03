@@ -16,7 +16,7 @@ namespace KoiFishAuction.Data.Repository
         {
             return await _context.Bids.Include(b => b.Bidder)
                                                .Include(b => b.AuctionSession)
-                                               .Where(b => b.Id == id).ToListAsync();
+                                               .Where(b => b.AuctionSessionId == id).ToListAsync();
         }
 
         public async Task<User> FindHighestBidder(int id)
@@ -27,6 +27,6 @@ namespace KoiFishAuction.Data.Repository
                                         .FirstOrDefaultAsync();
         }
 
-        
+
     }
 }

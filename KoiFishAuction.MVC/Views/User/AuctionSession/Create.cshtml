@@ -1,0 +1,49 @@
+﻿@model KoiFishAuction.Common.RequestModels.AuctionSession.CreateAuctionSessionRequestModel
+@{
+    ViewBag.Title = "Create New Auction Session";
+}
+
+<h2>Create New Auction Session</h2>
+
+@using (Html.BeginForm("Create", "AuctionSession", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Name, new { @class = "control-label" })
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control", placeholder = "Enter auction session name" })
+        @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Note, new { @class = "control-label" })
+        @Html.TextAreaFor(m => m.Note, new { @class = "form-control", placeholder = "Enter note" })
+        @Html.ValidationMessageFor(m => m.Note, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.Label("Koi Fish")
+        @Html.DropDownListFor(m => m.KoiFishId, (SelectList)ViewBag.KoiFishList, "Select Koi Fish", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.KoiFishId, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.StartTime, new { @class = "control-label" })
+        @Html.TextBoxFor(m => m.StartTime, "{0:yyyy-MM-ddTHH:mm}", new { @class = "form-control", type = "datetime-local" })
+        @Html.ValidationMessageFor(m => m.StartTime, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.EndTime, new { @class = "control-label" })
+        @Html.TextBoxFor(m => m.EndTime, "{0:yyyy-MM-ddTHH:mm}", new { @class = "form-control", type = "datetime-local" })
+        @Html.ValidationMessageFor(m => m.EndTime, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.MinIncrement, new { @class = "control-label" })
+        @Html.TextBoxFor(m => m.MinIncrement, new { @class = "form-control", placeholder = "Enter minimum increment" })
+        @Html.ValidationMessageFor(m => m.MinIncrement, "", new { @class = "text-danger" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Auction Session</button>
+}

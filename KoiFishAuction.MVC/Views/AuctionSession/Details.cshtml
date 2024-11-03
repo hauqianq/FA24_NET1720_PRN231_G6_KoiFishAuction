@@ -166,15 +166,31 @@
             <h2>Place Your Bid</h2>
             @if (Model.Status == KoiFishAuction.Data.Enumerrations.AuctionSessionStatus.Opening.ToString())
             {
-                @using (Html.BeginForm("PlaceBid", "Auction", FormMethod.Post))
+                @using (Html.BeginForm("CreateBid", "Bid", FormMethod.Post))
                 {
                     @Html.AntiForgeryToken()
-                    @Html.HiddenFor(m => m.Id)
+                    <!-- Hidden field for AuctionSessionId -->
+                    <input type="hidden" name="AuctionSessionId" value="@Model.Id" />
+
                     <div>
                         <label for="BidAmount">Enter your bid amount:</label><br />
-                        <input type="number" id="BidAmount" name="BidAmount" class="bid-input" min="@Model.Price + @Model.MinIncrement" required />
-                        <input type="submit" value="Place Bid" class="bid-button" />
+                        <input type="number" id="BidAmount" name="Amount" class="bid-input"
+                               min="@Model.Price + @Model.MinIncrement"
+                               required />
                     </div>
+                    <div>
+                        <label for="Currency">Currency:</label><br />
+                        <input type="text" id="Currency" name="Currency" class="bid-input" required />
+                    </div>
+                    <div>
+                        <label for="Location">Location:</label><br />
+                        <input type="text" id="Location" name="Location" class="bid-input" required />
+                    </div>
+                    <div>
+                        <label for="Note">Note:</label><br />
+                        <textarea id="Note" name="Note" class="bid-input"></textarea>
+                    </div>
+                    <input type="submit" value="Place Bid" class="bid-button" />
                 }
             }
             else
@@ -190,6 +206,7 @@
                 }
             }
         </div>
+
 
         <!-- Bid History -->
         @if (Model.BidViewModels != null && Model.BidViewModels.Any())

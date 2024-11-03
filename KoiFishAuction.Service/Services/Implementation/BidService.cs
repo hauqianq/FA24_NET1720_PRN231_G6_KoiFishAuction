@@ -25,12 +25,13 @@ namespace KoiFishAuction.Service.Services.Implementation
                 var auctionSession = await _unitOfWork.AuctionSessionRepository.GetAuctionSessionByIdAsync(auctionSessionId);
                 if (auctionSession == null)
                 {
-                    return new ServiceResult<List<BidViewModel>>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, "Auction session not found.");
+                    return new ServiceResult<List<BidViewModel>>(Common.Constant.StatusCode.FailedStatusCode, "Auction session not found.");
                 }
 
                 var bids = await _unitOfWork.BidRepository.GetBidsByAuctionSessionIdAsync(auctionSessionId);
-                var bidViewModels = bids.Select(b => new BidViewModel
+                var result = bids.Select(b => new BidViewModel
                 {
+                    BidderName = b.Bidder.FullName,
                     Amount = b.Amount,
                     Note = b.Note,
                     Timestamp = b.Timestamp,
@@ -39,7 +40,7 @@ namespace KoiFishAuction.Service.Services.Implementation
                     IsWinning = b.IsWinning
                 }).ToList();
 
-                return new ServiceResult<List<BidViewModel>>(Common.Constant.StatusCode.SuccessStatusCode, bidViewModels);
+                return new ServiceResult<List<BidViewModel>>(Common.Constant.StatusCode.SuccessStatusCode, result);
             }
             catch (Exception e)
             {
@@ -54,19 +55,19 @@ namespace KoiFishAuction.Service.Services.Implementation
                 var auction = await _unitOfWork.AuctionSessionRepository.GetAuctionSessionByIdAsync(request.AuctionSessionId);
                 if (auction == null)
                 {
-                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "This auction does not exist.");
+                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "This auction does not exist.", false);
                 }
 
                 var bidder = await _unitOfWork.UserRepository.GetUserByIdAsync(int.Parse(_httpContextAccessor.GetCurrentUserId()));
                 if (request.Amount > bidder.Balance)
                 {
-                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "Your account balance is not enough to participate in this auction.");
+                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "Your account balance is not enough to participate in this auction.", false);
                 }
 
 
                 if (request.Amount <= auction.KoiFish.CurrentPrice)
                 {
-                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "The price paid must be at least equal to the starting price.");
+                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "The price paid must be at least equal to the starting price.", false);
                 }
 
                 var bid = new Bid
@@ -92,11 +93,11 @@ namespace KoiFishAuction.Service.Services.Implementation
                     await _unitOfWork.AuctionSessionRepository.SaveAsync();
                 }
 
-                return new ServiceResult<bool>(Common.Constant.StatusCode.SuccessStatusCode, "Bidding for this jewelry was successful.");
+                return new ServiceResult<bool>(Common.Constant.StatusCode.SuccessStatusCode, "Bidding for this jewelry was successful.", true);
             }
             catch (Exception e)
             {
-                return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, e.Message, false);
             }
         }
     }

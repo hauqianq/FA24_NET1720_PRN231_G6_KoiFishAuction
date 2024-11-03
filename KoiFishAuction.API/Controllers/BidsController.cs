@@ -28,7 +28,7 @@ namespace KoiFishAuction.API.Controllers
             return Ok(result);
         }
 
-        [HttpPost("{userid}")]
+        [HttpPost]
         public async Task<IActionResult> CreateBid([FromBody] CreateBidRequestModel request)
         {
             if (!ModelState.IsValid)

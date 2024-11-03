@@ -6,7 +6,7 @@ namespace KoiFishAuction.MVC.Services.Interfaces
 {
     public interface IKoiFishApiClient
     {
-        Task<ServiceResult<List<KoiFishViewModel>>> GetAllKoiFishesAsync();
+        Task<ServiceResult<List<KoiFishViewModel>>> GetAllKoiFishesAsync(int userId);
         Task<ServiceResult<KoiFishDetailViewModel>> GetKoiFishByIdAsync(int id);
         Task<ServiceResult<int>> CreateKoiFishAsync(CreateKoiFishRequestModel request);
         Task<ServiceResult<bool>> DeleteKoiFishAsync(int id);

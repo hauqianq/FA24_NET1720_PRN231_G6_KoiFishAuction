@@ -14,12 +14,12 @@ namespace KoiFishAuction.MVC.Controllers
             _koiFishApiClient = koiFishApiClient;
         }
 
-        public string Message { get; set; }
-
         [HttpGet]
         public async Task<IActionResult> Index(string message)
         {
-            var result = await _koiFishApiClient.GetAllKoiFishesAsync();
+            var id = HttpContext.Session.GetInt32("id").Value;
+
+            var result = await _koiFishApiClient.GetAllKoiFishesAsync(id);
 
             ViewBag.Message = message;
 
@@ -29,7 +29,8 @@ namespace KoiFishAuction.MVC.Controllers
         [HttpGet]
         public async Task<JsonResult> Search(string searchQuery = null, string sortOrder = null)
         {
-            var result = await _koiFishApiClient.GetAllKoiFishesAsync();
+            var id = HttpContext.Session.GetInt32("id").Value;
+            var result = await _koiFishApiClient.GetAllKoiFishesAsync(id);
 
             if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
             {
@@ -72,7 +73,7 @@ namespace KoiFishAuction.MVC.Controllers
 
             if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
             {
-                return View(result.Data);
+                return View("~/Views/User/KoiFish/Details.cshtml", result.Data);
             }
 
             return NotFound();
@@ -82,7 +83,7 @@ namespace KoiFishAuction.MVC.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            return View();
+            return View("~/Views/User/KoiFish/Create.cshtml");
         }
 
         [HttpPost]
@@ -92,10 +93,10 @@ namespace KoiFishAuction.MVC.Controllers
 
             if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
             {
-                return RedirectToAction("~/Views/User/KoiFish/Index.cshtml", new { message = "Koi fish created successfully!" });
+                return RedirectToAction("Index", new { message = "Koi fish created successfully!" });
             }
 
-            ViewBag.Message = result.Message;   
+            ViewBag.Message = result.Message;
 
             return View();
         }
@@ -121,7 +122,7 @@ namespace KoiFishAuction.MVC.Controllers
                 Weight = koiFish.Weight,
                 Length = koiFish.Length,
                 ColorPattern = koiFish.ColorPattern,
-                Images = koiFish.Images 
+                Images = koiFish.Images
             };
 
             return View(model);
@@ -147,7 +148,7 @@ namespace KoiFishAuction.MVC.Controllers
                 Weight = model.Weight,
                 Length = model.Length,
                 ColorPattern = model.ColorPattern,
-                ImageUrls = model.Images 
+                ImageUrls = model.Images
             };
 
             var result = await _koiFishApiClient.UpdateKoiFishAsync(model.Id, request, newImages);
@@ -157,7 +158,7 @@ namespace KoiFishAuction.MVC.Controllers
                 return View(model);
             }
 
-            return RedirectToAction("~/Views/User/KoiFish/Details.cshtml", new { id = model.Id });
+            return RedirectToAction("Details", new { id = model.Id });
         }
 
 
@@ -166,16 +167,9 @@ namespace KoiFishAuction.MVC.Controllers
         {
             var result = await _koiFishApiClient.DeleteKoiFishAsync(id);
 
-            if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
-            {
-                ViewBag.Message = result.Message;
-                return RedirectToAction("~/Views/User/KoiFish/Index.cshtml");
-            }
-            else
-            {
-                ViewBag.Message = result.Message;
-                return RedirectToAction("~/Views/User/KoiFish/Index.cshtml");
-            }
+            ViewBag.Message = result.Message;
+
+            return RedirectToAction("Index", new {message = "Delete koi fish successfully!"});
         }
 
     }
