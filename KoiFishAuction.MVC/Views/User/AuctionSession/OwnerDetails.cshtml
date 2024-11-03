@@ -1,0 +1,166 @@
+﻿@model KoiFishAuction.Common.ViewModels.AuctionSession.AuctionSessionDetailViewModel
+<div class="auction-session-detail-owner">
+    <div class="basic-info card">
+        <div class="card-header">
+            <h2>Basic Information</h2>
+        </div>
+        <div class="card-body">
+            <p><strong>Auction ID:</strong> @Model.Id</p>
+            <p><strong>Name:</strong> @Model.Name</p>
+            <p><strong>Koi Fish Name:</strong> @Model.KoiFishName</p>
+            <p><strong>Current Price:</strong> $@Model.Price.ToString("F2")</p>
+            <p><strong>Start Time:</strong> @Model.StartTime.ToString("g")</p>
+            <p><strong>End Time:</strong> @Model.EndTime.ToString("g")</p>
+            <p><strong>Status:</strong> @Model.Status</p>
+            <p><strong>Minimum Increment:</strong> $@Model.MinIncrement.ToString("F2")</p>
+        </div>
+    </div>
+
+    <div class="winner-info card mt-4">
+        <div class="card-header">
+            <h2>Winner Information</h2>
+        </div>
+        <div class="card-body">
+            <p><strong>Winner:</strong> @Model.WinnerUsername ?? "No winner yet"</p>
+        </div>
+    </div>
+
+    <div class="images card mt-4">
+        <div class="card-header">
+            <h2>Images</h2>
+        </div>
+        <div class="card-body image-gallery">
+            @foreach (var imageUrl in Model.Images)
+            {
+                <img src="@imageUrl" alt="@Model.KoiFishName Image" class="auction-image" />
+            }
+        </div>
+    </div>
+
+    <div class="note-section card mt-4">
+        <div class="card-header">
+            <h2>Note</h2>
+        </div>
+        <div class="card-body">
+            <p>@Model.Note ?? "No additional notes."</p>
+        </div>
+    </div>
+
+    <div class="bids card mt-4">
+        <div class="card-header">
+            <h2>Bids</h2>
+        </div>
+        <div class="card-body">
+            @if (Model.BidViewModels != null && Model.BidViewModels.Any())
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Bidder Username</th>
+                            <th>Bid Amount</th>
+                            <th>Bid Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var bid in Model.BidViewModels)
+                        {
+                            <tr>
+                                <td>@bid.BidderName</td>
+                                <td>$@bid.Amount.ToString("F2")</td>
+                                <td>@bid.Timestamp.ToString("g")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>No bids yet for this auction session.</p>
+            }
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a asp-action="Edit" asp-controller="AuctionSession" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+        <a asp-action="GetAuctionSessionForUser" asp-controller="AuctionSession" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+
+<style>
+    .auction-session-detail-owner {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .action-buttons {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .btn {
+        padding: 8px 15px; /* Thu nhỏ nút */
+        font-size: 14px; /* Giảm kích thước chữ */
+        text-decoration: none;
+        margin: 5px;
+        border-radius: 4px;
+        display: inline-block;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        padding: 10px 15px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .card-body {
+        padding: 15px;
+    }
+
+    .image-gallery {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .auction-image {
+        width: 150px;
+        height: auto;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .table {
+        width: 100%;
+        margin-top: 15px;
+        border-collapse: collapse;
+    }
+
+        .table th, .table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+    .mt-4 {
+        margin-top: 20px;
+    }
+</style>

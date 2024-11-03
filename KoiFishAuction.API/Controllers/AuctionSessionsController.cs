@@ -24,7 +24,7 @@ namespace KoiFishAuction.API.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var result = await _auctionSessionService.CreateAuctionAsync(request);
+            var result = await _auctionSessionService.CreateAuctionSessionAsync(request);
             if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
             {
                 BadRequest(result.Message);
@@ -35,7 +35,7 @@ namespace KoiFishAuction.API.Controllers
         [HttpGet("ongoing")]
         public async Task<IActionResult> GetOngoingAuctions([FromQuery] string search = null)
         {
-            var result = await _auctionSessionService.GetOngoingAuctionsAsync(search);
+            var result = await _auctionSessionService.GetOngoingAuctionSessionAsync(search);
             return Ok(result);
         }
 
@@ -43,42 +43,14 @@ namespace KoiFishAuction.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetAuctionsForUser()
         {
-            var result = await _auctionSessionService.GetAuctionsForUserAsync();
+            var result = await _auctionSessionService.GetAuctionSessionForUserAsync();
             return Ok(result);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAuctionById(int id)
         {
-            var result = await _auctionSessionService.GetAuctionByIdAsync(id);
-            return Ok(result);
-        }
-
-        [HttpPut("{id}/winner")]
-        [Authorize]
-        public async Task<IActionResult> SetAuctionWinner(int id)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var result = await _auctionSessionService.SetAuctionWinnerAsync(id);
-            if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
-            {
-                BadRequest(result.Message);
-            }
-            return Ok(result);
-        }
-
-        [HttpPut("{id}/status")]
-        [Authorize]
-        public async Task<IActionResult> ChangeAuctionStatus(int id)
-        {
-            var result = await _auctionSessionService.ChangeAuctionStatusAsync(id);
-            if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
-            {
-                BadRequest(result.Message);
-            }
+            var result = await _auctionSessionService.GetAuctionSessionByIdAsync(id);
             return Ok(result);
         }
 
@@ -86,7 +58,19 @@ namespace KoiFishAuction.API.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateAuction([FromBody] UpdateAuctionSessionRequestModel request)
         {
-            var result = await _auctionSessionService.UpdateAuctionAsync(request);
+            var result = await _auctionSessionService.UpdateAuctionSessionAsync(request);
+            if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
+            {
+                BadRequest(result.Message);
+            }
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteAuction(int id)
+        {
+            var result = await _auctionSessionService.DeleteAuctionSessionAsync(id);
             if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
             {
                 BadRequest(result.Message);

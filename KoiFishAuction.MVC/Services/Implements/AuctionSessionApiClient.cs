@@ -1,4 +1,5 @@
-﻿using KoiFishAuction.Common.RequestModels.AuctionSession;
+﻿using Azure.Core;
+using KoiFishAuction.Common.RequestModels.AuctionSession;
 using KoiFishAuction.Common.ViewModels.AuctionSession;
 using KoiFishAuction.MVC.Services.Interfaces;
 using KoiFishAuction.Service.Services;
@@ -68,32 +69,6 @@ namespace KoiFishAuction.MVC.Services.Implements
             return JsonConvert.DeserializeObject<ServiceResult<AuctionSessionDetailViewModel>>(result);
         }
 
-        public async Task<ServiceResult<int>> SetAuctionSessionWinnerAsync(int id)
-        {
-            var client = _httpClientFactory.CreateClient();
-            client.BaseAddress = new Uri(Common.Constant.EndPoint.APIEndPoint);
-
-            var session = _httpContextAccessor.HttpContext.Session.GetString("Token");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session);
-
-            var response = await client.PutAsync($"/api/auctionsessions/{id}/winner", null);
-            var result = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<ServiceResult<int>>(result);
-        }
-
-        public async Task<ServiceResult<bool>> ChangeAuctionSessionStatusAsync(int id)
-        {
-            var client = _httpClientFactory.CreateClient();
-            client.BaseAddress = new Uri(Common.Constant.EndPoint.APIEndPoint);
-
-            var session = _httpContextAccessor.HttpContext.Session.GetString("Token");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session);
-
-            var response = await client.PutAsync($"/api/auctionsessions/{id}/status", null);
-            var result = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<ServiceResult<bool>>(result);
-        }
-
         public async Task<ServiceResult<int>> UpdateAuctionSessionAsync(UpdateAuctionSessionRequestModel request)
         {
             var client = _httpClientFactory.CreateClient();
@@ -108,6 +83,19 @@ namespace KoiFishAuction.MVC.Services.Implements
             var response = await client.PutAsync($"/api/auctionsessions", httpContent);
             var result = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<ServiceResult<int>>(result);
+        }
+
+        public async Task<ServiceResult<bool>> DeleteAuctionSessionAsync(int id)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(Common.Constant.EndPoint.APIEndPoint);
+
+            var session = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session);
+
+            var response = await client.DeleteAsync($"/api/auctionsessions/{id}");
+            var result = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<ServiceResult<bool>>(result);
         }
     }
 }

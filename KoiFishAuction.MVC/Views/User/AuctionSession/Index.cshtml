@@ -35,14 +35,14 @@
             {
                 <tr>
                     <td>
-                        <a href="@Url.Action("Details", "AuctionSession", new { id = session.Id })" class="text-decoration-none">
+                        <a href="@Url.Action("OwnerDetails", "AuctionSession", new { id = session.Id })" class="text-decoration-none">
                             @session.Name
                         </a>
                     </td>
-                    <td>@session.KoiFishName</td>
+                    <td class="truncate">@session.KoiFishName</td>
                     <td>@session.Price.ToString("C")</td>
-                    <td>@session.StartTime.ToString("f")</td>
-                    <td>@session.EndTime.ToString("f")</td>
+                    <td>@session.StartTime.ToString("g")</td>
+                    <td>@session.EndTime.ToString("g")</td>
                     <td>
                         <span class="badge
                             @(session.Status == KoiFishAuction.Data.Enumerrations.AuctionSessionStatus.Opening.ToString() ? "bg-success" :
@@ -52,8 +52,11 @@
                         </span>
                     </td>
                     <td>
-                        <a href="@Url.Action("Update", "AuctionSession", new { id = session.Id })" class="btn btn-sm btn-warning">Update</a>
-                        <a href="@Url.Action("Delete", "AuctionSession", new { id = session.Id })" class="btn btn-sm btn-danger">Delete</a>
+                        <a href="@Url.Action("Edit", "AuctionSession", new { id = session.Id })" class="btn btn-sm btn-warning">Update</a>
+                        <form action="@Url.Action("Delete", "AuctionSession")" method="post" onsubmit="return confirmDelete();" style="display:inline;">
+                            <input type="hidden" name="id" value="@session.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
                     </td>
                 </tr>
             }
@@ -76,18 +79,29 @@
         transition: opacity 0.5s ease;
         z-index: 1000;
     }
+
+    .truncate {
+        max-width: 150px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 </style>
 
 <script>
     // Toast JavaScript
-    window.onload = function() {
+    window.onload = function () {
         var toast = document.getElementById("toastMessage");
         if (toast) {
             // Hide toast after 3 seconds
-            setTimeout(function() {
+            setTimeout(function () {
                 toast.style.opacity = "0";
-                setTimeout(function() { toast.remove(); }, 500); // Remove element after fade-out
+                setTimeout(function () { toast.remove(); }, 500); // Remove element after fade-out
             }, 3000);
         }
     };
+
+    function confirmDelete() {
+        return confirm("Are you sure you want to delete this auction session?");
+    }
 </script>

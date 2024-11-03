@@ -56,7 +56,7 @@ namespace KoiFishAuction.Data.Repository
             return result;
         }
 
-        public async Task SetWinnerForAuctionSession(int winnerId, int auctionSessionId)
+        private async Task SetWinnerForAuctionSession(int winnerId, int auctionSessionId)
         {
             var auctionSession = await _context.AuctionSessions.FirstOrDefaultAsync(auc => auc.Id == auctionSessionId);
             auctionSession.WinnerId = winnerId;

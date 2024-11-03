@@ -9,7 +9,7 @@ using KoiFishAuction.Service.Services;
 using KoiFishAuction.Service.Services.Interface;
 using Microsoft.AspNetCore.Http;
 
-namespace JewelryAuction.Business.Business.Implementation
+namespace KoiFishAuction.Service.Services.Implementation
 {
     public class AuctionSessionService : IAuctionSessionService
     {
@@ -21,40 +21,13 @@ namespace JewelryAuction.Business.Business.Implementation
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<ServiceResult<bool>> ChangeAuctionStatusAsync(int id)
-        {
-            try
-            {
-                var auction = await _unitOfWork.AuctionSessionRepository.GetAuctionSessionByIdAsync(id);
-                if (auction == null)
-                {
-                    return new ServiceResult<bool>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, "The auction does not exist.");
-                }
-
-                if (auction.Status == (int)AuctionSessionStatus.Opening)
-                {
-                    return new ServiceResult<bool>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, "This auction has already been closed.");
-                }
-
-                auction.Status = (int)AuctionSessionStatus.Closed;
-                await _unitOfWork.AuctionSessionRepository.UpdateAsync(auction);
-                await _unitOfWork.AuctionSessionRepository.SaveAsync();
-
-                return new ServiceResult<bool>(KoiFishAuction.Common.Constant.StatusCode.SuccessStatusCode, "The auction has been closed successfully.");
-            }
-            catch (Exception e)
-            {
-                return new ServiceResult<bool>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, e.Message);
-            }
-        }
-
-        public async Task<ServiceResult<int>> CreateAuctionAsync(CreateAuctionSessionRequestModel request)
+        public async Task<ServiceResult<int>> CreateAuctionSessionAsync(CreateAuctionSessionRequestModel request)
         {
             try
             {
                 if (request.StartTime >= request.EndTime)
                 {
-                    return new ServiceResult<int>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, "The auction end time must be after the start time.");
+                    return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, "The auction end time must be after the start time.");
                 }
 
                 var status = request.StartTime > DateTime.Now ? (int)AuctionSessionStatus.Future : (int)AuctionSessionStatus.Opening;
@@ -76,22 +49,22 @@ namespace JewelryAuction.Business.Business.Implementation
                 await _unitOfWork.AuctionSessionRepository.CreateAsync(auctionSession);
                 await _unitOfWork.AuctionSessionRepository.SaveAsync();
 
-                return new ServiceResult<int>(KoiFishAuction.Common.Constant.StatusCode.SuccessStatusCode, "Create a successful auction.", auctionSession.Id);
+                return new ServiceResult<int>(Common.Constant.StatusCode.SuccessStatusCode, "Create a successful auction.", auctionSession.Id);
             }
             catch (Exception e)
             {
-                return new ServiceResult<int>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
             }
         }
 
-        public async Task<ServiceResult<AuctionSessionDetailViewModel>> GetAuctionByIdAsync(int id)
+        public async Task<ServiceResult<AuctionSessionDetailViewModel>> GetAuctionSessionByIdAsync(int id)
         {
             try
             {
                 var auction = await _unitOfWork.AuctionSessionRepository.GetAuctionSessionByIdAsync(id);
                 if (auction == null)
                 {
-                    return new ServiceResult<AuctionSessionDetailViewModel>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, "The auction does not exist.");
+                    return new ServiceResult<AuctionSessionDetailViewModel>(Common.Constant.StatusCode.FailedStatusCode, "The auction does not exist.");
                 }
 
                 var bids = await _unitOfWork.BidRepository.GetBidsByAuctionSessionIdAsync(auction.Id);
@@ -122,16 +95,16 @@ namespace JewelryAuction.Business.Business.Implementation
                     }).ToList()
                 };
 
-                return new ServiceResult<AuctionSessionDetailViewModel>(KoiFishAuction.Common.Constant.StatusCode.SuccessStatusCode, result);
+                return new ServiceResult<AuctionSessionDetailViewModel>(Common.Constant.StatusCode.SuccessStatusCode, result);
 
             }
             catch (Exception e)
             {
-                return new ServiceResult<AuctionSessionDetailViewModel>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<AuctionSessionDetailViewModel>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
             }
         }
 
-        public async Task<ServiceResult<List<AuctionSessionViewModel>>> GetAuctionsForUserAsync()
+        public async Task<ServiceResult<List<AuctionSessionViewModel>>> GetAuctionSessionForUserAsync()
         {
             try
             {
@@ -141,7 +114,7 @@ namespace JewelryAuction.Business.Business.Implementation
 
                 if (data.Count == 0)
                 {
-                    return new ServiceResult<List<AuctionSessionViewModel>>(KoiFishAuction.Common.Constant.StatusCode.SuccessStatusCode, "This user does not have any auctions.");
+                    return new ServiceResult<List<AuctionSessionViewModel>>(Common.Constant.StatusCode.SuccessStatusCode, "This user does not have any auctions.");
                 }
                 else
                 {
@@ -157,15 +130,15 @@ namespace JewelryAuction.Business.Business.Implementation
                         Image = auc.KoiFish.KoiImages.Select(KoiFish => KoiFish.ImageUrl).FirstOrDefault()
                     }).ToList();
 
-                    return new ServiceResult<List<AuctionSessionViewModel>>(KoiFishAuction.Common.Constant.StatusCode.SuccessStatusCode, result);
+                    return new ServiceResult<List<AuctionSessionViewModel>>(Common.Constant.StatusCode.SuccessStatusCode, result);
                 }
             }
             catch (Exception e)
             {
-                return new ServiceResult<List<AuctionSessionViewModel>>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<List<AuctionSessionViewModel>>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
             }
         }
-        public async Task<ServiceResult<List<AuctionSessionViewModel>>> GetOngoingAuctionsAsync(string search = null)
+        public async Task<ServiceResult<List<AuctionSessionViewModel>>> GetOngoingAuctionSessionAsync(string search = null)
         {
             try
             {
@@ -179,7 +152,7 @@ namespace JewelryAuction.Business.Business.Implementation
 
                 if (data.Count == 0)
                 {
-                    return new ServiceResult<List<AuctionSessionViewModel>>(KoiFishAuction.Common.Constant.StatusCode.SuccessStatusCode, "There aren't any auctions.");
+                    return new ServiceResult<List<AuctionSessionViewModel>>(Common.Constant.StatusCode.SuccessStatusCode, "There aren't any auctions.");
                 }
                 else
                 {
@@ -195,100 +168,105 @@ namespace JewelryAuction.Business.Business.Implementation
                         Image = auc.KoiFish.KoiImages.Select(KoiFish => KoiFish.ImageUrl).FirstOrDefault()
                     }).ToList();
 
-                    return new ServiceResult<List<AuctionSessionViewModel>>(KoiFishAuction.Common.Constant.StatusCode.SuccessStatusCode, result);
+                    return new ServiceResult<List<AuctionSessionViewModel>>(Common.Constant.StatusCode.SuccessStatusCode, result);
                 }
             }
             catch (Exception e)
             {
-                return new ServiceResult<List<AuctionSessionViewModel>>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<List<AuctionSessionViewModel>>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
             }
         }
 
-        public async Task<ServiceResult<bool>> CanUpdateAuctionAsync(int id)
+        private async Task<bool> ValidateAuctionSessionAsync(UpdateAuctionSessionRequestModel request)
         {
-            try
+            var auction = await _unitOfWork.AuctionSessionRepository.GetAuctionSessionByIdAsync(request.Id);
+
+            if (auction.Status == (int)AuctionSessionStatus.Opening)
             {
-                var auction = await _unitOfWork.AuctionSessionRepository.GetAuctionSessionByIdAsync(id);
-                if (auction == null)
-                {
-                    return new ServiceResult<bool>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, "This auction does not exist.");
-                }
-
-                if (auction.Status == (int)AuctionSessionStatus.Opening)
-                {
-                    return new ServiceResult<bool>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, "You cannot change auction information while it is in progress.");
-                }
-
-                if (auction.Status == (int)AuctionSessionStatus.Closed)
-                {
-                    return new ServiceResult<bool>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, "You cannot change the information of an auction once it has ended.");
-                }
-
-                return new ServiceResult<bool>(KoiFishAuction.Common.Constant.StatusCode.SuccessStatusCode);
+                throw new InvalidOperationException("You cannot change auction information while it is in progress.");
             }
-            catch (Exception e)
+
+            if (auction.Status == (int)AuctionSessionStatus.Closed)
             {
-                return new ServiceResult<bool>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                throw new InvalidOperationException("You cannot change the information of an auction once it has ended.");
             }
+
+            if (request.StartTime <= DateTime.Now)
+            {
+                throw new InvalidOperationException("The auction creation date must be after today.");
+            }
+
+            if (request.StartTime >= request.EndTime)
+            {
+                throw new InvalidOperationException("The auction end time must be after the start time.");
+            }
+
+            return true;
         }
 
-        public async Task<ServiceResult<int>> SetAuctionWinnerAsync(int auctionId)
-        {
-            try
-            {
-                var auction = await _unitOfWork.AuctionSessionRepository.GetAuctionSessionByIdAsync(auctionId);
-                if (auction == null)
-                {
-                    return new ServiceResult<int>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode);
-                }
 
-                var winner = await _unitOfWork.UserRepository.GetUserByIdAsync(int.Parse(_httpContextAccessor.GetCurrentUserId()));
-                if (winner == null)
-                {
-                    return new ServiceResult<int>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode);
-                }
-
-                auction.WinnerId = winner.Id;
-                await _unitOfWork.AuctionSessionRepository.SaveAsync();
-
-                return new ServiceResult<int>(KoiFishAuction.Common.Constant.StatusCode.SuccessStatusCode);
-            }
-            catch (Exception e)
-            {
-                return new ServiceResult<int>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, e.Message);
-            }
-        }
-
-        public async Task<ServiceResult<int>> UpdateAuctionAsync(UpdateAuctionSessionRequestModel request)
+        public async Task<ServiceResult<int>> UpdateAuctionSessionAsync(UpdateAuctionSessionRequestModel request)
         {
             try
             {
                 var auction = await _unitOfWork.AuctionSessionRepository.GetAuctionSessionByIdAsync(request.Id);
                 if (auction == null)
                 {
-                    return new ServiceResult<int>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode);
+                    return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, "This auction does not exist.");
                 }
 
-                if (request.StartTime <= DateTime.Now)
-                {
-                    return new ServiceResult<int>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, "The auction creation date must be after to day.");
-                }
-
-                if (request.StartTime >= request.EndTime)
-                {
-                    return new ServiceResult<int>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, "The auction end time must be after the start time.");
-                }
+                await ValidateAuctionSessionAsync(request);
 
                 auction.StartTime = request.StartTime;
                 auction.EndTime = request.EndTime;
+                auction.Name = request.Name;
+                auction.Note = request.Note;
+                auction.MinIncrement = request.MinIncrement;
+                auction.Status = request.Status;
+
                 await _unitOfWork.AuctionSessionRepository.UpdateAsync(auction);
                 await _unitOfWork.AuctionSessionRepository.SaveAsync();
 
-                return new ServiceResult<int>(KoiFishAuction.Common.Constant.StatusCode.SuccessStatusCode, "Successfully changed auction information.");
+                return new ServiceResult<int>(Common.Constant.StatusCode.SuccessStatusCode, "Successfully changed auction information.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, ex.Message);
             }
             catch (Exception e)
             {
-                return new ServiceResult<int>(KoiFishAuction.Common.Constant.StatusCode.FailedStatusCode, e.Message);
+                return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
+            }
+        }
+
+        public async Task<ServiceResult<bool>> DeleteAuctionSessionAsync(int id)
+        {
+            try
+            {
+                var auction = await _unitOfWork.AuctionSessionRepository.GetAuctionSessionByIdAsync(id);
+                if (auction == null)
+                {
+                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "This auction does not exist.", false);
+                }
+
+                if (auction.Status == (int)AuctionSessionStatus.Opening)
+                {
+                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "You cannot delete an auction that is in progress.", false);
+                }
+
+                if (auction.Status == (int)AuctionSessionStatus.Closed)
+                {
+                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "You cannot delete an auction that has ended.", false);
+                }
+
+                await _unitOfWork.AuctionSessionRepository.RemoveAsync(auction);
+                await _unitOfWork.AuctionSessionRepository.SaveAsync();
+
+                return new ServiceResult<bool>(Common.Constant.StatusCode.SuccessStatusCode, "The auction has been deleted successfully.", true);
+            }
+            catch (Exception e)
+            {
+                return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, e.Message, false);
             }
         }
     }

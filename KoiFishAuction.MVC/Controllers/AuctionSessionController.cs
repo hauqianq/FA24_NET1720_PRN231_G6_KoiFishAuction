@@ -2,6 +2,7 @@
 using KoiFishAuction.MVC.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace KoiFishAuction.MVC.Controllers
 {
@@ -68,9 +69,55 @@ namespace KoiFishAuction.MVC.Controllers
         {
             var result = await _auctionSessionApiClient.CreateAuctionSessionAsync(request);
 
+            return RedirectToAction("GetAuctionSessionForUser", "AuctionSession", new { message = result.Message });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _auctionSessionApiClient.DeleteAuctionSessionAsync(id);
+
+            return RedirectToAction("GetAuctionSessionForUser", "AuctionSession", new { message = result.Message });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var auctionSession = (await _auctionSessionApiClient.GetAuctionSessionByIdAsync(id)).Data;
+            if (auctionSession == null)
+            {
+                return NotFound();
+            }
+
+            var model = new UpdateAuctionSessionRequestModel
+            {
+                Id = auctionSession.Id,
+                Name = auctionSession.Name,
+                Note = auctionSession.Note,
+                StartTime = auctionSession.StartTime,
+                EndTime = auctionSession.EndTime,
+                MinIncrement = auctionSession.MinIncrement
+            };
+
+            return View("~/Views/User/AuctionSession/Edit.cshtml", model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(UpdateAuctionSessionRequestModel request)
+        {
+            var result = await _auctionSessionApiClient.UpdateAuctionSessionAsync(request);
+
+            return RedirectToAction("GetAuctionSessionForUser", "AuctionSession", new { message = result.Message });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> OwnerDetails(int id)
+        {
+            var result = await _auctionSessionApiClient.GetAuctionSessionByIdAsync(id);
+
             ViewBag.Message = result.Message;
 
-            return RedirectToAction("GetAuctionSessionForUser", "AuctionSession", new { message = "Auction Session created successfully!" });
+            return View("~/Views/User/AuctionSession/OwnerDetails.cshtml", result.Data);
         }
     }
 }
