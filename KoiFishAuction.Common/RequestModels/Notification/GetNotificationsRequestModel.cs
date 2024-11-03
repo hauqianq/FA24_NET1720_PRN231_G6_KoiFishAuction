@@ -7,6 +7,8 @@ public sealed class GetNotificationsRequestModel : PaginationRequest {
 
     public string? Type { get; set; }
 
+    public string? Message {  get; set; }   
+
     public DateTime? StartDate { get; set; }
 
     [DateGreaterThan("StartDate", ErrorMessage = "EndDate must be greater than StartDate.")]
