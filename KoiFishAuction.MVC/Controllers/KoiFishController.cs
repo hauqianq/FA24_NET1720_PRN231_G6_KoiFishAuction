@@ -21,50 +21,55 @@ namespace KoiFishAuction.MVC.Controllers
 
             var result = await _koiFishApiClient.GetAllKoiFishesAsync(id);
 
+            if (result.Message != null)
+            {
+                ViewBag.Message = result.Message;
+            }
+
             ViewBag.Message = message;
 
             return View("~/Views/User/KoiFish/Index.cshtml", result.Data);
         }
 
         [HttpGet]
-        public async Task<JsonResult> Search(string searchQuery = null, string sortOrder = null)
+        public async Task<JsonResult> SearchKoiFishes(string searchName = null, string searchOrigin = null, string searchColorPattern = null, string sortOrder = null)
         {
             var id = HttpContext.Session.GetInt32("id").Value;
+
             var result = await _koiFishApiClient.GetAllKoiFishesAsync(id);
+            var koiFishes = result.Data;
 
-            if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
+            // Filter by name
+            if (!string.IsNullOrEmpty(searchName))
             {
-                var koiFishes = result.Data as List<KoiFishViewModel> ?? new List<KoiFishViewModel>();
-
-                if (!string.IsNullOrEmpty(searchQuery))
-                {
-                    koiFishes = koiFishes.Where(k => k.Name.Contains(searchQuery, System.StringComparison.OrdinalIgnoreCase)).ToList();
-                }
-
-                switch (sortOrder)
-                {
-                    case "Name":
-                        koiFishes = koiFishes.OrderBy(k => k.Name).ToList();
-                        break;
-                    case "CurrentPrice":
-                        koiFishes = koiFishes.OrderBy(k => k.CurrentPrice).ToList();
-                        break;
-                    case "Origin":
-                        koiFishes = koiFishes.OrderBy(k => k.Origin).ToList();
-                        break;
-                    case "ColorPattern":
-                        koiFishes = koiFishes.OrderBy(k => k.ColorPattern).ToList();
-                        break;
-                    default:
-                        koiFishes = koiFishes.OrderBy(k => k.Name).ToList();
-                        break;
-                }
-
-                return new JsonResult(koiFishes);
+                koiFishes = koiFishes.Where(k => k.Name.Contains(searchName, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
-            return new JsonResult(new List<KoiFishViewModel>());
+            // Filter by origin
+            if (!string.IsNullOrEmpty(searchOrigin))
+            {
+                koiFishes = koiFishes.Where(k => k.Origin.Contains(searchOrigin, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            // Filter by color pattern
+            if (!string.IsNullOrEmpty(searchColorPattern))
+            {
+                koiFishes = koiFishes.Where(k => k.ColorPattern.Contains(searchColorPattern, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            // Sort the results based on the sortOrder
+            koiFishes = sortOrder switch
+            {
+                "Name" => koiFishes.OrderBy(k => k.Name).ToList(),
+                "CurrentPrice" => koiFishes.OrderBy(k => k.CurrentPrice).ToList(),
+                "Origin" => koiFishes.OrderBy(k => k.Origin).ToList(),
+                "ColorPattern" => koiFishes.OrderBy(k => k.ColorPattern).ToList(),
+                _ => koiFishes.OrderBy(k => k.Name).ToList(),
+            };
+
+            return Json(koiFishes);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> Details(int id)
@@ -93,12 +98,10 @@ namespace KoiFishAuction.MVC.Controllers
 
             if (result.Status == Common.Constant.StatusCode.SuccessStatusCode)
             {
-                return RedirectToAction("Index", new { message = "Koi fish created successfully!" });
+                return RedirectToAction("Index", "KoiFish", new { message = result.Message });
             }
 
-            ViewBag.Message = result.Message;
-
-            return View();
+            return View("~/Views/User/KoiFish/Create.cshtml");
         }
 
         [HttpGet]
@@ -110,7 +113,7 @@ namespace KoiFishAuction.MVC.Controllers
                 return NotFound();
             }
 
-            var model = new KoiFishDetailViewModel
+            var model = new UpdateKoiFishRequestModel
             {
                 Id = koiFish.Id,
                 Name = koiFish.Name,
@@ -122,43 +125,23 @@ namespace KoiFishAuction.MVC.Controllers
                 Weight = koiFish.Weight,
                 Length = koiFish.Length,
                 ColorPattern = koiFish.ColorPattern,
-                Images = koiFish.Images
             };
 
-            return View(model);
+            return View("~/Views/User/KoiFish/Edit.cshtml", model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(KoiFishDetailViewModel model, List<IFormFile> newImages)
+        public async Task<IActionResult> Edit(UpdateKoiFishRequestModel request)
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return View("~/Views/User/KoiFish/Edit.cshtml", request);
             }
 
-            var request = new UpdateKoiFishRequestModel
-            {
-                Id = model.Id,
-                Name = model.Name,
-                Description = model.Description,
-                StartingPrice = model.StartingPrice,
-                CurrentPrice = model.CurrentPrice,
-                Age = model.Age,
-                Origin = model.Origin,
-                Weight = model.Weight,
-                Length = model.Length,
-                ColorPattern = model.ColorPattern,
-                ImageUrls = model.Images
-            };
+            var result = await _koiFishApiClient.UpdateKoiFishAsync(request);
 
-            var result = await _koiFishApiClient.UpdateKoiFishAsync(model.Id, request, newImages);
-            if (result.Status == Common.Constant.StatusCode.FailedStatusCode)
-            {
-                ModelState.AddModelError("", result.Message);
-                return View(model);
-            }
 
-            return RedirectToAction("Details", new { id = model.Id });
+            return RedirectToAction("Index", "KoiFish", new { message = result.Message });
         }
 
 
@@ -169,7 +152,7 @@ namespace KoiFishAuction.MVC.Controllers
 
             ViewBag.Message = result.Message;
 
-            return RedirectToAction("Index", new {message = "Delete koi fish successfully!"});
+            return RedirectToAction("Index", "KoiFish", new { message = result.Message });
         }
 
     }

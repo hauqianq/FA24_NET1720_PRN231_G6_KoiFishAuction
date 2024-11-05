@@ -13,8 +13,6 @@
         public decimal Weight { get; set; }
         public decimal Length { get; set; }
         public string ColorPattern { get; set; }
-
-        public List<string> ImageUrls { get; set; }
     }
 
 }

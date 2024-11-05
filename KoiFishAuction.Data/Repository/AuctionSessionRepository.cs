@@ -38,7 +38,10 @@ namespace KoiFishAuction.Data.Repository
             {
                 if (auction.EndTime <= DateTime.Now && auction.Status != (int)AuctionSessionStatus.Closed)
                 {
-                    await UpdateAuctionSessionStatusAsync(auction.Id, (int)AuctionSessionStatus.Closed);
+                    if (auction.Bids.Any())
+                    {
+                        await UpdateAuctionSessionStatusAsync(auction.Id, (int)AuctionSessionStatus.Closed);
+                    }
                 }
             }
 

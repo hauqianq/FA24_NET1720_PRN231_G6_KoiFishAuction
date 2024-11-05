@@ -25,30 +25,6 @@ namespace KoiFishAuction.Service.Services.Implementation
             _firebaseStorageService = firebaseStorageService;
         }
 
-        public async Task<bool> CanUpdateKoiFishAsync(int id)
-        {
-            try
-            {
-                var koiFish = await _unitOfWork.KoiFishRepository.GetByIdAsync(id);
-                if (koiFish == null)
-                {
-                    return false;
-                }
-
-                var result = await _unitOfWork.KoiFishRepository.IsKoiInAuction(id);
-                if (result)
-                {
-                    return false;
-                }
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-        }
-
         private async Task<List<KoiImage>> AddListImages(List<IFormFile> request)
         {
             List<KoiImage> images = new List<KoiImage>();
@@ -186,23 +162,42 @@ namespace KoiFishAuction.Service.Services.Implementation
             }
         }
 
-        public async Task<ServiceResult<int>> UpdateKoiFishAsync(int id, UpdateKoiFishRequestModel request, List<IFormFile> newImages)
+        private async Task ValidateKoiFishAsync(UpdateKoiFishRequestModel request)
+        {
+            var result = await _unitOfWork.KoiFishRepository.IsKoiInAuction(request.Id);
+            if (result)
+            {
+                throw new InvalidOperationException("This koiFish is in an auction session and cannot be updated.");
+            }
+            if (request.StartingPrice <= 0)
+            {
+                throw new InvalidOperationException("The starting price must be greater than 0.");
+            }
+
+            if (request.CurrentPrice <= 0)
+            {
+                throw new InvalidOperationException("The current price must be greater than 0.");
+            }
+
+            if (request.Age <= 0)
+            {
+                throw new InvalidOperationException("The age must be greater than 0.");
+            }
+        }
+
+        public async Task<ServiceResult<int>> UpdateKoiFishAsync(UpdateKoiFishRequestModel request)
         {
             try
             {
-                var koiFish = await _unitOfWork.KoiFishRepository.GetKoiFishByIdAsync(id);
+                var koiFish = await _unitOfWork.KoiFishRepository.GetKoiFishByIdAsync(request.Id);
 
                 if (koiFish == null)
                 {
                     return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, "This koiFish does not exist.");
                 }
 
-                if (request.StartingPrice <= 0)
-                {
-                    return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, "The starting price must be greater than 0.");
-                }
+                await ValidateKoiFishAsync(request);
 
-                // Cập nhật thông tin cơ bản
                 koiFish.Description = request.Description;
                 koiFish.Name = request.Name;
                 koiFish.StartingPrice = request.StartingPrice;
@@ -213,63 +208,14 @@ namespace KoiFishAuction.Service.Services.Implementation
                 koiFish.Length = request.Length;
                 koiFish.ColorPattern = request.ColorPattern;
 
-                // Xử lý ảnh
-                if (request.ImageUrls != null && request.ImageUrls.Count > 0)
-                {
-                    // Xóa ảnh cũ nếu không còn trong danh sách
-                    var imagesToDelete = koiFish.KoiImages.Where(img => !request.ImageUrls.Contains(img.ImageUrl)).ToList();
-                    foreach (var image in imagesToDelete)
-                    {
-                        // Gọi service để xóa ảnh trong Firebase và database
-                        await _firebaseStorageService.DeleteKoiFishImage(image.ImageUrl);
-                        _unitOfWork.KoiImageRepository.Remove(image);
-                    }
-                }
-
-                // Upload ảnh mới
-                if (newImages != null && newImages.Count > 0)
-                {
-                    foreach (var newImage in newImages)
-                    {
-                        var imageUrl = await _firebaseStorageService.UploadKoiFishImage(newImage);
-                        var koiImage = new KoiImage
-                        {
-                            KoiFishId = koiFish.Id,
-                            ImageUrl = imageUrl
-                        };
-                        _unitOfWork.KoiImageRepository.Create(koiImage);
-                    }
-                }
-
-                // Lưu thay đổi
                 _unitOfWork.KoiFishRepository.Update(koiFish);
                 await _unitOfWork.KoiFishRepository.SaveAsync();
 
-                return new ServiceResult<int>(Common.Constant.StatusCode.SuccessStatusCode, "Update koiFish successful.", koiFish.Id);
+                return new ServiceResult<int>(Common.Constant.StatusCode.SuccessStatusCode, "Update koiFish successfully.", koiFish.Id);
             }
-            catch (Exception e)
+            catch (InvalidOperationException e)
             {
                 return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, e.Message);
-            }
-        }
-        
-        public async Task<ServiceResult<int>> UpdateKoiFishPriceAsync(int id, decimal price)
-        {
-            try
-            {
-                var koiFish = await _unitOfWork.KoiFishRepository.GetKoiFishByIdAsync(id);
-
-                if (koiFish == null)
-                {
-                    return new ServiceResult<int>(Common.Constant.StatusCode.FailedStatusCode, "This koiFish does not exist.");
-                }
-
-                koiFish.CurrentPrice = price;
-
-                _unitOfWork.KoiFishRepository.Update(koiFish);
-                await _unitOfWork.KoiFishRepository.SaveAsync();
-
-                return new ServiceResult<int>(Common.Constant.StatusCode.SuccessStatusCode, id);
             }
             catch (Exception e)
             {

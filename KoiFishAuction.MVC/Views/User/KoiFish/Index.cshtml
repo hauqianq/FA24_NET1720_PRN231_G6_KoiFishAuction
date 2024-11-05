@@ -4,16 +4,13 @@
     ViewData["Title"] = "Koi Fish List";
 }
 
-<div class="container">
-    <p>
-        <a class="btn btn-light" asp-action="Create">Create New Koi Fish</a>
-    </p>
-    <div class="header-container">
-        <input type="text" id="SearchQuery" class="form-control search-input" placeholder="Search by Koi Fish Name" oninput="searchKoiFishes()" />
-        <input type="hidden" id="SortOrder" value="" />
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Koi Fish List</h2>
+        <a href="@Url.Action("Create", "KoiFish")" class="btn btn-primary">Create New Koi Fish</a>
     </div>
 
-    <!-- Toast Message -->
+    <!-- Toast Notification -->
     @if (!string.IsNullOrEmpty(ViewBag.Message))
     {
         <div id="toastMessage" class="toast-message">
@@ -21,34 +18,47 @@
         </div>
     }
 
-    <table class="table table-hover">
-        <thead>
+    <!-- Search form with three separate fields -->
+    <form id="searchForm" onsubmit="event.preventDefault(); searchKoiFishes();">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <input type="text" id="SearchName" class="form-control" placeholder="Search by Name" />
+            </div>
+            <div class="col-md-4">
+                <input type="text" id="SearchOrigin" class="form-control" placeholder="Search by Origin" />
+            </div>
+            <div class="col-md-4">
+                <input type="text" id="SearchColorPattern" class="form-control" placeholder="Search by Color Pattern" />
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+        <input type="hidden" id="SortOrder" value="" />
+    </form>
+
+    <!-- Koi Fish Table -->
+    <table class="table table-striped table-bordered mt-3">
+        <thead class="thead-dark">
             <tr>
                 <th><a href="#" onclick="sortKoiFishes('Name')">Name</a></th>
                 <th><a href="#" onclick="sortKoiFishes('CurrentPrice')">Current Price</a></th>
                 <th><a href="#" onclick="sortKoiFishes('Origin')">Origin</a></th>
                 <th><a href="#" onclick="sortKoiFishes('ColorPattern')">Color Pattern</a></th>
-                <th></th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody id="koi-fish-table-body">
             @foreach (var item in Model)
             {
-                <tr id="row-@item.Id">
-                    <td>
-                        <a asp-action="Details" asp-route-id="@item.Id">
-                            @item.Name
-                        </a>
-                    </td>
+                <tr>
+                    <td><a href="@Url.Action("Details", "KoiFish", new { id = item.Id })">@item.Name</a></td>
                     <td>@item.CurrentPrice.ToString("C")</td>
                     <td>@item.Origin</td>
                     <td>@item.ColorPattern</td>
                     <td>
                         <a asp-action="Edit" class="btn btn-outline-info btn-sm" asp-route-id="@item.Id">Edit</a>
-
-                        <form method="post" action="@Url.Action("Delete", new { id = item.Id })" style="display:inline;"
-                              onsubmit="return confirmDelete();">
-                            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                        <form method="post" action="@Url.Action("Delete", "KoiFish")" onsubmit="return confirmDelete();" style="display:inline;">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                         </form>
                     </td>
                 </tr>
@@ -60,70 +70,76 @@
 <style>
     /* Toast CSS */
     .toast-message {
-        position: absolute;
+        position: fixed;
         top: 20px;
         right: 20px;
-        background-color: #17a2b8;
+        background-color: #28a745;
         color: white;
-        padding: 10px 20px;
+        padding: 15px;
         border-radius: 5px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         opacity: 1;
         transition: opacity 0.5s ease;
-        z-index: 10;
+        z-index: 1000;
     }
 </style>
 
 @section Scripts {
     <script>
-        function searchKoiFishes() {
-            var searchQuery = $("#SearchQuery").val();
-            var sortOrder = $("#SortOrder").val();
-            $.ajax({
-                url: "@Url.Action("Search", "KoiFish")",
-                type: "GET",
-                data: { searchQuery: searchQuery, sortOrder: sortOrder },
-                success: function (data) {
-                    var tableBody = $("#koi-fish-table-body");
-                    tableBody.empty();
-                    $.each(data, function (i, item) {
-                        var row = `<tr>
-                                                        <td><a href="/KoiFish/Details?id=${item.id}">${item.name}</a></td>
-                                                        <td>${parseFloat(item.currentPrice).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
-                                                        <td>${item.origin}</td>
-                                                        <td>${item.colorPattern}</td>
-                                                        <td>
-                                                            <a href="/KoiFish/Edit?id=${item.id}" class="btn btn-outline-info btn-sm">Edit</a>
-                                                            <form method="post" action="/KoiFish/Delete/${item.id}" style="display:inline;" onsubmit="return confirmDelete();">
-                                                                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-                                                            </form>
-                                                        </td>
-                                                    </tr>`;
-                        tableBody.append(row);
-                    });
-                },
-                error: function () {
-                    alert("An error occurred while searching for Koi Fishes.");
-                }
-            });
-        }
+        // Toast Notification handling
+        window.onload = function () {
+            var toast = document.getElementById("toastMessage");
+            if (toast) {
+                setTimeout(function () {
+                    toast.style.opacity = "0";
+                    setTimeout(function () { toast.remove(); }, 500);
+                }, 3000);
+            }
+        };
 
-        // Function to show confirmation dialog before deleting
+        // Confirm deletion
         function confirmDelete() {
             return confirm("Are you sure you want to delete this Koi Fish?");
         }
 
-        // Function to handle sorting and update table dynamically
-        function sortKoiFishes(order) {
-            $("#SortOrder").val(order);
-            searchKoiFishes();
+        // AJAX search function for Koi Fish
+        function searchKoiFishes() {
+            var searchName = $('#SearchName').val();
+            var searchOrigin = $('#SearchOrigin').val();
+            var searchColorPattern = $('#SearchColorPattern').val();
+            var sortOrder = $('#SortOrder').val();
+
+            $.ajax({
+                url: '@Url.Action("SearchKoiFishes", "KoiFish")',
+                type: 'GET',
+                data: { searchName: searchName, searchOrigin: searchOrigin, searchColorPattern: searchColorPattern, sortOrder: sortOrder },
+                success: function (data) {
+                    var tableBody = $('#koi-fish-table-body');
+                    tableBody.empty();
+                    $.each(data, function (i, item) {
+                        var row = `<tr>
+                                        <td><a href="/KoiFish/Details/${item.id}">${item.name}</a></td>
+                                        <td>${item.currentPrice.toFixed(2)}</td>
+                                        <td>${item.origin}</td>
+                                        <td>${item.colorPattern}</td>
+                                        <td>
+                                            <a href="/KoiFish/Edit/${item.id}" class="btn btn-sm btn-warning">Edit</a>
+                                            <form action="/KoiFish/Delete" method="post" onsubmit="return confirmDelete();" style="display:inline;">
+                                                <input type="hidden" name="id" value="${item.id}" />
+                                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>`;
+                        tableBody.append(row);
+                    });
+                }
+            });
         }
 
-        // Toast fade out after 3 seconds
-        $(document).ready(function () {
-            setTimeout(function () {
-                $('#toastMessage').fadeOut('slow');
-            }, 3000);
-        });
+        // Sort Koi Fish list
+        function sortKoiFishes(order) {
+            $('#SortOrder').val(order);
+            searchKoiFishes();
+        }
     </script>
 }

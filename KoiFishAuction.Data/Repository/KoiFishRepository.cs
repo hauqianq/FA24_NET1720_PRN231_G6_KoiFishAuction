@@ -1,4 +1,5 @@
 ﻿using KoiFishAuction.Data.Base;
+using KoiFishAuction.Data.Enumerrations;
 using KoiFishAuction.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,6 +55,12 @@ namespace KoiFishAuction.Data.Repository
 
             _context.KoiFishes.Update(koiFishewelry);
             return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> IsKoiFishInAuctionSession(int id)
+        {
+            var result = await _context.AuctionSessions.AnyAsync(a => a.KoiFishId == id && (AuctionSessionStatus)a.Status == AuctionSessionStatus.Opening);
+            return result;
         }
     }
 }

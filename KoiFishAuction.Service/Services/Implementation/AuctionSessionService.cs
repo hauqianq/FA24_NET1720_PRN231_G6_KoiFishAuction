@@ -125,7 +125,10 @@ namespace KoiFishAuction.Service.Services.Implementation
                         KoiFishName = auc.KoiFish.Name,
                         StartTime = auc.StartTime,
                         EndTime = auc.EndTime,
-                        Status = ((AuctionSessionStatus)auc.Status).ToString(),
+                        Status = Enum.IsDefined(typeof(AuctionSessionStatus), auc.Status)
+                                ? ((AuctionSessionStatus)auc.Status).ToString()
+                                : "Unknown",
+
                         Price = auc.KoiFish.CurrentPrice,
                         Image = auc.KoiFish.KoiImages.Select(KoiFish => KoiFish.ImageUrl).FirstOrDefault()
                     }).ToList();
@@ -163,7 +166,9 @@ namespace KoiFishAuction.Service.Services.Implementation
                         KoiFishName = auc.KoiFish.Name,
                         StartTime = auc.StartTime,
                         EndTime = auc.EndTime,
-                        Status = ((AuctionSessionStatus)auc.Status).ToString(),
+                        Status = Enum.IsDefined(typeof(AuctionSessionStatus), auc.Status)
+                                ? ((AuctionSessionStatus)auc.Status).ToString()
+                                : "Unknown",
                         Price = auc.KoiFish.CurrentPrice,
                         Image = auc.KoiFish.KoiImages.Select(KoiFish => KoiFish.ImageUrl).FirstOrDefault()
                     }).ToList();
@@ -177,7 +182,7 @@ namespace KoiFishAuction.Service.Services.Implementation
             }
         }
 
-        private async Task<bool> ValidateAuctionSessionAsync(UpdateAuctionSessionRequestModel request)
+        private async Task ValidateAuctionSessionAsync(UpdateAuctionSessionRequestModel request)
         {
             var auction = await _unitOfWork.AuctionSessionRepository.GetAuctionSessionByIdAsync(request.Id);
 
@@ -200,8 +205,6 @@ namespace KoiFishAuction.Service.Services.Implementation
             {
                 throw new InvalidOperationException("The auction end time must be after the start time.");
             }
-
-            return true;
         }
 
 

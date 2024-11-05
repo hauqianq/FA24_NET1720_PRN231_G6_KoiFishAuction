@@ -10,7 +10,6 @@ namespace KoiFishAuction.MVC.Services.Interfaces
         Task<ServiceResult<KoiFishDetailViewModel>> GetKoiFishByIdAsync(int id);
         Task<ServiceResult<int>> CreateKoiFishAsync(CreateKoiFishRequestModel request);
         Task<ServiceResult<bool>> DeleteKoiFishAsync(int id);
-        Task<ServiceResult<int>> UpdateKoiFishAsync(int id, UpdateKoiFishRequestModel model, List<IFormFile> newImages);
-        Task<ServiceResult<int>> UpdateKoiFishPriceAsync(int id, decimal price);
+        Task<ServiceResult<int>> UpdateKoiFishAsync(UpdateKoiFishRequestModel model);
     }
 }

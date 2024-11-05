@@ -1,4 +1,5 @@
-﻿using KoiFishAuction.Common.RequestModels.KoiFish;
+﻿using Azure.Core;
+using KoiFishAuction.Common.RequestModels.KoiFish;
 using KoiFishAuction.Common.ViewModels.KoiFish;
 using KoiFishAuction.MVC.Services.Interfaces;
 using KoiFishAuction.Service.Services;
@@ -100,7 +101,7 @@ namespace KoiFishAuction.MVC.Services.Implements
             return JsonConvert.DeserializeObject<ServiceResult<KoiFishDetailViewModel>>(result);
         }
 
-        public async Task<ServiceResult<int>> UpdateKoiFishAsync(int id, UpdateKoiFishRequestModel model, List<IFormFile> newImages)
+        public async Task<ServiceResult<int>> UpdateKoiFishAsync(UpdateKoiFishRequestModel request)
         {
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(Common.Constant.EndPoint.APIEndPoint);
@@ -108,50 +109,13 @@ namespace KoiFishAuction.MVC.Services.Implements
             var session = _httpContextAccessor.HttpContext.Session.GetString("Token");
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session);
 
-            var formData = new MultipartFormDataContent();
-            formData.Add(new StringContent(model.Name), "Name");
-            formData.Add(new StringContent(model.Description), "Description");
-            formData.Add(new StringContent(model.StartingPrice.ToString()), "StartingPrice");
-            formData.Add(new StringContent(model.CurrentPrice.ToString()), "CurrentPrice");
-            formData.Add(new StringContent(model.Age.ToString()), "Age");
-            formData.Add(new StringContent(model.Origin), "Origin");
-            formData.Add(new StringContent(model.Weight.ToString()), "Weight");
-            formData.Add(new StringContent(model.Length.ToString()), "Length");
-            formData.Add(new StringContent(model.ColorPattern), "ColorPattern");
-
-            // Thêm các hình ảnh mới vào request
-            if (newImages != null && newImages.Count > 0)
-            {
-                foreach (var image in newImages)
-                {
-                    var streamContent = new StreamContent(image.OpenReadStream());
-                    formData.Add(streamContent, "newImages", image.FileName);
-                }
-            }
-
-            var response = await client.PutAsync($"/api/KoiFish/{id}", formData);
-            var result = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<ServiceResult<int>>(result);
-        }
-
-
-
-
-        public async Task<ServiceResult<int>> UpdateKoiFishPriceAsync(int id, decimal price)
-        {
-            var client = _httpClientFactory.CreateClient();
-            client.BaseAddress = new Uri(Common.Constant.EndPoint.APIEndPoint);
-
-            var session = _httpContextAccessor.HttpContext.Session.GetString("Token");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session);
-
-            var json = JsonConvert.SerializeObject(new { Price = price });
+            var json = JsonConvert.SerializeObject(request);
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await client.PutAsync($"/api/koifish/{id}/price", httpContent);
+            var response = await client.PutAsync($"/api/KoiFish", httpContent);
             var result = await response.Content.ReadAsStringAsync();
+
             return JsonConvert.DeserializeObject<ServiceResult<int>>(result);
         }
-
     }
 }
