@@ -1,4 +1,5 @@
-﻿using KoiFishAuction.Common.RequestModels.KoiFish;
+﻿using Azure.Core;
+using KoiFishAuction.Common.RequestModels.KoiFish;
 using KoiFishAuction.Common.ViewModels.KoiFish;
 using KoiFishAuction.Data;
 using KoiFishAuction.Data.Models;
@@ -83,6 +84,12 @@ namespace KoiFishAuction.Service.Services.Implementation
                 if (koiFish == null)
                 {
                     return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "This koi fish does not exist.");
+                }
+
+                var result = await _unitOfWork.KoiFishRepository.IsKoiInAuction(id);
+                if (result)
+                {
+                    return new ServiceResult<bool>(Common.Constant.StatusCode.FailedStatusCode, "This koiFish is in an auction session and cannot delete.");
                 }
 
                 await _unitOfWork.KoiFishRepository.RemoveAsync(koiFish);

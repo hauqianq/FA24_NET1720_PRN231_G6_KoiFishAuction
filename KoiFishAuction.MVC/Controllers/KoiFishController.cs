@@ -150,8 +150,6 @@ namespace KoiFishAuction.MVC.Controllers
         {
             var result = await _koiFishApiClient.DeleteKoiFishAsync(id);
 
-            ViewBag.Message = result.Message;
-
             return RedirectToAction("Index", "KoiFish", new { message = result.Message });
         }
 

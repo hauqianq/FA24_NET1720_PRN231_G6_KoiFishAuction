@@ -1,7 +1,7 @@
 ﻿@model List<KoiFishAuction.Common.ViewModels.AuctionSession.AuctionSessionViewModel>
 
 @{
-    ViewData["Title"] = "Auction";
+    ViewData["Title"] = "Auction Session List";
 }
 
 <!DOCTYPE html>
@@ -20,11 +20,6 @@
             margin-bottom: 20px;
         }
 
-        .search-container {
-            display: flex;
-            align-items: center;
-        }
-
         .search-input {
             width: 250px;
             margin-right: 10px;
@@ -33,10 +28,6 @@
         .search-button, .create-button {
             height: 38px;
             line-height: 1;
-        }
-
-        .form {
-            display: flex;
         }
 
         .auction-container {
@@ -83,46 +74,118 @@
 </head>
 <body>
     <div class="container">
-        @if (ViewBag.Message != null)
-        {
-            <div class="alert alert-info">
-                @ViewBag.Message
+        <!-- Form tìm kiếm với StartTime và EndTime -->
+        <form id="searchForm" onsubmit="event.preventDefault(); searchAuctionSessions();">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <input type="text" id="SearchName" class="form-control" placeholder="Search by Auction Session Name" />
+                </div>
+                <div class="col-md-4">
+                    <input type="text" id="SearchKoiFishName" class="form-control" placeholder="Search by Koi Fish Name" />
+                </div>
+                <div class="col-md-2">
+                    <input type="date" id="SearchStartTime" class="form-control" placeholder="Start Time" />
+                </div>
+                <div class="col-md-2">
+                    <input type="date" id="SearchEndTime" class="form-control" placeholder="End Time" />
+                </div>
             </div>
-        }
-        @if (Model != null && Model.Any())
-        {
-            foreach (var item in Model)
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+        <!-- Container để hiển thị các phiên đấu giá -->
+        <div id="auction-results">
+            @if (Model != null && Model.Any())
             {
-                <div class="auction-container card">
-                    <div class="row no-gutters">
-                        <div class="col-12 col-lg-4">
-                            <img src="@item.Image" alt="Auction Image" class="auction-image card-img" />
-                        </div>
-                        <div class="col-12 col-lg-8">
-                            <div class="card-body auction-details">
-                                <h5 class="card-title">
-                                    <a href="@Url.Action("Details", "AuctionSession", new { id = item.Id })">
-                                        @item.Name (@item.KoiFishName)
-                                    </a>
-                                </h5>
-                                <div><strong>Current Price:</strong> @item.Price</div>
-                                <div><strong>Start Time:</strong> @item.StartTime.ToString("f")</div>
-                                <div><strong>End Time:</strong> @item.EndTime.ToString("f")</div>
-                                <div>
-                                    <span class="auction-status @(item.Status == "Opening" ? "status-opening" : item.Status == "Closed" ? "status-closed" : "status-future")">
-                                        @item.Status
-                                    </span>
+                @foreach (var item in Model)
+                {
+                    <div class="auction-container card">
+                        <div class="row no-gutters">
+                            <div class="col-12 col-lg-4">
+                                <img src="@item.Image" alt="Auction Image" class="auction-image card-img" />
+                            </div>
+                            <div class="col-12 col-lg-8">
+                                <div class="card-body auction-details">
+                                    <h5 class="card-title">
+                                        <a href="@Url.Action("Details", "AuctionSession", new { id = item.Id })">
+                                            @item.Name (@item.KoiFishName)
+                                        </a>
+                                    </h5>
+                                    <div><strong>Current Price:</strong> @item.Price</div>
+                                    <div><strong>Start Time:</strong> @item.StartTime.ToString("f")</div>
+                                    <div><strong>End Time:</strong> @item.EndTime.ToString("f")</div>
+                                    <div>
+                                        <span class="auction-status @(item.Status == "Opening" ? "status-opening" : item.Status == "Closed" ? "status-closed" : "status-future")">
+                                            @item.Status
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                }
             }
-        }
-        else
-        {
-            <p class="no-auctions">No Active Auctions</p>
-        }
+            else
+            {
+                <p class="no-auctions">No Active Auctions</p>
+            }
+        </div>
     </div>
 </body>
 </html>
+
+@section Scripts {
+    <script>
+        function searchAuctionSessions() {
+            var searchName = $('#SearchName').val();
+            var searchKoiFishName = $('#SearchKoiFishName').val();
+            var searchStartTime = $('#SearchStartTime').val();
+            var searchEndTime = $('#SearchEndTime').val();
+
+            $.ajax({
+                url: '@Url.Action("SearchAuctionSessions", "AuctionSession")',
+                type: 'GET',
+                data: { searchName: searchName, searchKoiFishName: searchKoiFishName, searchStartTime: searchStartTime, searchEndTime: searchEndTime },
+                success: function (data) {
+                    var resultsContainer = $('#auction-results');
+                    resultsContainer.empty(); // Xóa nội dung cũ
+
+                    if (data.length > 0) {
+                        $.each(data, function (i, item) {
+                            var row = `<div class="auction-container card">
+                                                    <div class="row no-gutters">
+                                                        <div class="col-12 col-lg-4">
+                                                            <img src="${item.image}" alt="Auction Image" class="auction-image card-img" />
+                                                        </div>
+                                                        <div class="col-12 col-lg-8">
+                                                            <div class="card-body auction-details">
+                                                                <h5 class="card-title">
+                                                                    <a href="/AuctionSession/Details/${item.id}">
+                                                                        ${item.name} (${item.koiFishName})
+                                                                    </a>
+                                                                </h5>
+                                                                <div><strong>Current Price:</strong> ${item.price}</div>
+                                                                <div><strong>Start Time:</strong> ${new Date(item.startTime).toLocaleString()}</div>
+                                                                <div><strong>End Time:</strong> ${new Date(item.endTime).toLocaleString()}</div>
+                                                                <div>
+                                                                    <span class="auction-status ${item.status == 'Opening' ? 'status-opening' : item.status == 'Closed' ? 'status-closed' : 'status-future'}">
+                                                                        ${item.status}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>`;
+                            resultsContainer.append(row);
+                        });
+                    } else {
+                        resultsContainer.html('<p class="no-auctions">No Active Auctions</p>');
+                    }
+                },
+                error: function () {
+                    alert("An error occurred while searching for auctions.");
+                }
+            });
+        }
+    </script>
+}

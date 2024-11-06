@@ -31,39 +31,34 @@ namespace KoiFishAuction.MVC.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> SearchAuctionSessions(string searchName = null, string searchKoiFishName = null, string searchPrice = null, string sortOrder = null)
+        public async Task<JsonResult> SearchAuctionSessions(string searchName = null, string searchKoiFishName = null, DateTime? searchStartTime = null, DateTime? searchEndTime = null)
         {
             var result = await _auctionSessionApiClient.GetOngoingAuctionSessionAsync();
-            var sessions = result.Data;
+            var auctionSessions = result.Data;
 
             if (!string.IsNullOrEmpty(searchName))
             {
-                sessions = sessions.Where(s => s.Name.Contains(searchName, StringComparison.OrdinalIgnoreCase)).ToList();
+                auctionSessions = auctionSessions.Where(a => a.Name.Contains(searchName, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
             if (!string.IsNullOrEmpty(searchKoiFishName))
             {
-                sessions = sessions.Where(s => s.KoiFishName.Contains(searchKoiFishName, StringComparison.OrdinalIgnoreCase)).ToList();
+                auctionSessions = auctionSessions.Where(a => a.KoiFishName.Contains(searchKoiFishName, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
-            if (!string.IsNullOrEmpty(searchPrice) && decimal.TryParse(searchPrice, out var price))
+            if (searchStartTime.HasValue)
             {
-                sessions = sessions.Where(s => s.Price == price).ToList();
+                auctionSessions = auctionSessions.Where(a => a.StartTime >= searchStartTime.Value).ToList();
             }
 
-            sessions = sortOrder switch
+            if (searchEndTime.HasValue)
             {
-                "Name" => sessions.OrderBy(s => s.Name).ToList(),
-                "KoiFishName" => sessions.OrderBy(s => s.KoiFishName).ToList(),
-                "Price" => sessions.OrderBy(s => s.Price).ToList(),
-                "StartTime" => sessions.OrderBy(s => s.StartTime).ToList(),
-                "EndTime" => sessions.OrderBy(s => s.EndTime).ToList(),
-                "Status" => sessions.OrderBy(s => s.Status).ToList(),
-                _ => sessions.OrderBy(s => s.Name).ToList(),
-            };
+                auctionSessions = auctionSessions.Where(a => a.EndTime <= searchEndTime.Value).ToList();
+            }
 
-            return Json(sessions);
+            return Json(auctionSessions);
         }
+
 
 
 
