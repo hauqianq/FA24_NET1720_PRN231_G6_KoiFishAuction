@@ -9,26 +9,38 @@ namespace KoiFishAuction.MVC.Controllers
     {
         private readonly IKoiFishApiClient _koiFishApiClient;
 
+        private readonly int PageIndex = 1;
+        private readonly int PageSize = 2;
+
         public KoiFishController(IKoiFishApiClient koiFishApiClient)
         {
             _koiFishApiClient = koiFishApiClient;
         }
 
+
         [HttpGet]
-        public async Task<IActionResult> Index(string message)
+        public async Task<IActionResult> Index(string message, int page = 1, int pageSize = 2)
         {
             var id = HttpContext.Session.GetInt32("id").Value;
 
             var result = await _koiFishApiClient.GetAllKoiFishesAsync(id);
 
-            if (result.Message != null)
-            {
-                ViewBag.Message = result.Message;
-            }
+            var koiFishes = result.Data ?? new List<KoiFishViewModel>();
 
+            int counts = koiFishes.Count;
+            int totalPages = (int)Math.Ceiling((double)counts / pageSize);
+
+            page = page < 1 ? 1 : page;
+            page = page > totalPages ? totalPages : page;
+
+            var paginatedKoiFishes = koiFishes.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            ViewBag.Page = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.PageSize = pageSize;
             ViewBag.Message = message;
 
-            return View("~/Views/User/KoiFish/Index.cshtml", result.Data);
+            return View("~/Views/User/KoiFish/Index.cshtml", paginatedKoiFishes);
         }
 
         [HttpGet]

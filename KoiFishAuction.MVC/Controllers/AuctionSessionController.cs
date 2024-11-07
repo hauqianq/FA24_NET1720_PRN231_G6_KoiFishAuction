@@ -1,4 +1,5 @@
 ﻿using KoiFishAuction.Common.RequestModels.AuctionSession;
+using KoiFishAuction.Common.ViewModels.AuctionSession;
 using KoiFishAuction.MVC.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -60,8 +61,6 @@ namespace KoiFishAuction.MVC.Controllers
         }
 
 
-
-
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
@@ -73,19 +72,27 @@ namespace KoiFishAuction.MVC.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAuctionSessionForUser(string message)
+        public async Task<IActionResult> GetAuctionSessionForUser(string message, int page = 1, int pageSize = 2)
         {
             var result = await _auctionSessionApiClient.GetAuctionSessionForUserAsync();
+            var auctionSessions = result.Data ?? new List<AuctionSessionViewModel>();
 
-            if (result.Message != null)
-            {
-                ViewBag.Message = result.Message;
-            }
+            int totalSessions = auctionSessions.Count;
+            int totalPages = (int)Math.Ceiling((double)totalSessions / pageSize);
 
+            page = page < 1 ? 1 : page;
+            page = page > totalPages ? totalPages : page;
+
+            var paginatedSessions = auctionSessions.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            ViewBag.Page = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.PageSize = pageSize;
             ViewBag.Message = message;
 
-            return View("~/Views/User/AuctionSession/Index.cshtml", result.Data);
+            return View("~/Views/User/AuctionSession/Index.cshtml", paginatedSessions);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> Create()
